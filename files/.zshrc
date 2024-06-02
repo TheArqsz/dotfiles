@@ -6,6 +6,7 @@
 
 # TERM
 export TERM=xterm-256color
+export DOTFILES="$HOME/.dotfiles"
 
 # Colors
 unset LSCOLORS
@@ -26,10 +27,6 @@ if [ -f ~/.functions ]
 then
   source ~/.functions
 fi
-
-# Skipping Ubuntu system-wide compinit
-# https://gist.github.com/ctechols/ca1035271ad134841284?permalink_comment_id=3401477#gistcomment-3401477
-set skip_global_compinit 1
 
 # Allow comments even in interactive shells.
 setopt interactive_comments
@@ -83,7 +80,10 @@ fi
 
 # Zinit snippets and plugins https://zdharma-continuum.github.io/zinit/wiki/Example-Oh-My-Zsh-setup/
 setopt promptsubst
-compdef _gnu_generic fd
+
+# https://github.com/marlonrichert/zsh-autocomplete/issues/441#issuecomment-1227104931
+zmodload zsh/complist
+autoload -Uz compinit && compinit -C
 
 # Temporary prompt until pure theme loads
 PS1="$ "
@@ -96,6 +96,10 @@ zinit lucid for \
         OMZP::git
 
 zinit for \
+    atload"zicompinit; zicdreplay" \
+    blockf \
+    lucid \
+    wait \
   zsh-hooks/zsh-hooks \
   zdharma-continuum/fast-syntax-highlighting  \
   zsh-users/zsh-history-substring-search \
@@ -105,39 +109,37 @@ zinit for \
 zinit lucid for \
     OMZL::clipboard.zsh \
     OMZP::copyfile \
-    OMZP::systemd/systemd.plugin.zsh \
-    OMZP::pip/pip.plugin.zsh \
+    OMZP::systemd \
+    OMZP::pip \
     Aloxaf/fzf-tab \
     OMZP::eza \
     OMZP::tldr \
     OMZP::command-not-found 
 
-# zinit blockf for as'completions' \
-#     OMZP::fd/_fd \
-#     OMZP::docker-compose/_docker-compose
+# zinit ice as"completion"; zinit snippet https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker
 
 # https://htr3n.github.io/2018/07/faster-zsh/
 # https://gist.github.com/ctechols/ca1035271ad134841284
-autoload -Uz compinit
-if [[ -f "$HOME/.zcompdump" ]]; then
-  # Check if the cached .zcompdump file must be regenerated once a day 
-  # (today as a day in the year vs the time of .zcompdump creation in a day of a year)
-  if [ $(date +%j) != $(date -r "$HOME/.zcompdump" +%j) ]; then
-    compinit 
-  else
-    # Use cached
-    # compinit -C - not working? gonna fix it in the future
-    # Some completions are not loading poperly after the first session is loaded
-    # As an example - ufw is not completing properly
-    # compinit -w says that:
-    # regenerating because: number of files in dump 993 differ from files found in $fpath 1303
-    # This takes almost half the time of prompt to initialize
-    compinit
-  fi
-else
-  # File doesn't exist - we have to regenerate it anyway
-  compinit
-fi
+# autoload -Uz compinit
+# if [[ -f "$HOME/.zcompdump" ]]; then
+#   # Check if the cached .zcompdump file must be regenerated once a day 
+#   # (today as a day in the year vs the time of .zcompdump creation in a day of a year)
+#   if [ $(date +%j) != $(date -r "$HOME/.zcompdump" +%j) ]; then
+#     compinit 
+#   else
+#     # Use cached
+#     # compinit -C - not working? gonna fix it in the future
+#     # Some completions are not loading poperly after the first session is loaded
+#     # As an example - ufw is not completing properly
+#     # compinit -w says that:
+#     # regenerating because: number of files in dump 993 differ from files found in $fpath 1303
+#     # This takes almost half the time of prompt to initialize
+#     compinit
+#   fi
+# else
+#   # File doesn't exist - we have to regenerate it anyway
+#   compinit
+# fi
 
 zinit cdreplay -q
 # --- END plugins
@@ -189,13 +191,13 @@ SPACESHIP_EXIT_CODE_SHOW=true
 SPACESHIP_EXIT_CODE_SYMBOL=''
 
 # User section
-SPACESHIP_USER_SHOW=false #'always'
+SPACESHIP_USER_SHOW='always'
 # Section's suffix
 SPACESHIP_USER_SUFFIX=''
 
 # Host section
 # Display host
-SPACESHIP_HOST_SHOW="always"
+SPACESHIP_HOST_SHOW=true
 SPACESHIP_HOST_PREFIX='@'
 SPACESHIP_HOST_SUFFIX=''
 
@@ -208,7 +210,7 @@ SPACESHIP_DIR_TRUNC=0
 # Do not truncate path in repos
 SPACESHIP_DIR_TRUNC_REPO=false
 # Render git section asynchronously
-SPACESHIP_GIT_BRANCH_ASYNC=true
+SPACESHIP_GIT_BRANCH_ASYNC=false
 # Section's prefix
 SPACESHIP_GIT_PREFIX=''
 # Symbol displayed before the section (by default requires powerline patched font)
@@ -237,10 +239,9 @@ zinit light spaceship-prompt/spaceship-prompt
 [[ -f "$HOME/.config/custom.spaceship.zsh" ]] && source "$HOME/.config/custom.spaceship.zsh"
 
 # Custom sections
-
-zinit light https://github.com/windwhinny/spaceship-arch
+zinit light windwhinny/spaceship-arch
 spaceship add arch
-zinit snippet TheArqsz/spaceship-ip.plugin.zsh
+zinit light TheArqsz/spaceship-ip
 spaceship add ip
 
 # https://github.com/spaceship-prompt/spaceship-prompt/issues/1356
@@ -259,9 +260,9 @@ SPACESHIP_PROMPT_ORDER=(
   docker_compose  # Docker section
   ansible         # Ansible section
   venv            # virtualenv section
+  exit_code       # Exit code section
   exec_time       # Execution time
   line_sep        # Line break
-  exit_code       # Exit code section
   sudo            # Sudo indicator
   char            # Prompt character
 )
@@ -318,6 +319,7 @@ bindkey '^[[1;5C' forward-word                  # Ctrl+Right
 bindkey '^[[1;5D' backward-word                 # Ctrl+Left
 bindkey "\e"t     tldr-command-line                 # ESC+t
 bindkey '^H' backward-kill-word # Ctrl+Backspace
+bindkey '^[[3;5~' kill-word # Ctrl+Delete
 # --- END Bindings
 
 # History

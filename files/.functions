@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 # Enter a running Docker container.
-compdef '_docker run' dockenter
 function dockenter {
  if [[ ! "$1" ]] ; then
      echo "You must supply a container ID or name."

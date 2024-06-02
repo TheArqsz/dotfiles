@@ -27,9 +27,13 @@ alias grep="grep -n --color"
 alias sudo='sudo '
 
 # https://github.com/denysdovhan/dotfiles/blob/master/lib/aliases.zsh
-alias update="source $DOTFILES/scripts/update"
+alias update="source $DOTFILES/scripts/update.sh"
 
 # Quick reload of zsh environment
 alias reload="source $HOME/.zshrc"
 
-alias xclip='copyfile'
+alias -- +x='chmod +x'
+
+alias update="source $DOTFILES/scripts/update"
+
+echo $DOTFILES
