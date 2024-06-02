@@ -12,7 +12,7 @@ _exists() {
 
 # Success reporter
 info() {
-    echo -e "${CYAN}${*}${RESET}"
+    echo -e "${*}"
 }
 
 # End section
@@ -82,6 +82,8 @@ main() {
     update_zinit "$*"
     update_brew "$*"
     update_apt_get "$*"
+
+    info "Reload your shell"
 }
 
 main
