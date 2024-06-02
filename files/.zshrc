@@ -211,6 +211,7 @@ SPACESHIP_DIR_TRUNC=0
 SPACESHIP_DIR_TRUNC_REPO=false
 # Render git section asynchronously
 SPACESHIP_GIT_BRANCH_ASYNC=false
+[[ "$(uname)" == "Darwin" ]] && SPACESHIP_GIT_BRANCH_ASYNC=true
 # Section's prefix
 SPACESHIP_GIT_PREFIX=''
 # Symbol displayed before the section (by default requires powerline patched font)
@@ -246,6 +247,7 @@ spaceship add ip
 
 # https://github.com/spaceship-prompt/spaceship-prompt/issues/1356
 SPACESHIP_PROMPT_ASYNC=false
+[[ "$(uname)" == "Darwin" ]] && SPACESHIP_PROMPT_ASYNC=true
 # https://github.com/spaceship-prompt/spaceship-prompt/issues/1193#issuecomment-1954674054
 SPACESHIP_PROMPT_ORDER=(
   user            # Username section
