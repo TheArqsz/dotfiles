@@ -35,5 +35,3 @@ alias reload="source $HOME/.zshrc"
 alias -- +x='chmod +x'
 
 alias update="source $DOTFILES/scripts/update.sh"
-
-echo $DOTFILES
