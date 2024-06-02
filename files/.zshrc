@@ -292,7 +292,7 @@ if [[ ! "$PATH" == *$HOME/.fzf/bin* ]]; then
   PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
 fi
 # fd installation is necessary https://github.com/sharkdp/fd?tab=readme-ov-file#installation
-if ! (( $+commands[fdfind] )); then
+if ! (( $+commands[fdfind] )) && ! (( $+commands[fd] )); then
   echo "fdfind/fd is not installed"
   echo "Follow instructions at https://github.com/sharkdp/fd?tab=readme-ov-file#installation and restart your shell"
 fi
