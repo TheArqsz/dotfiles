@@ -33,7 +33,7 @@ setopt interactive_comments
 
 # Python Pyenv
 # ---
-export DEFAULT_PYENV_PYTHON_VERSION=3.11.9
+export DEFAULT_PYENV_PYTHON_VERSION=3.10.7
 # Initialization takes huge portion of time when shell is started
 # Temporary workaround: https://github.com/pyenv/pyenv/issues/2918#issuecomment-1977029534
 pyenv() {
@@ -95,16 +95,19 @@ zinit lucid for \
         OMZL::git.zsh \
         OMZP::git
 
+export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+
 zinit for \
-    atload"zicompinit; zicdreplay" \
+    atload"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
     blockf \
     lucid \
     wait \
   zsh-hooks/zsh-hooks \
-  zdharma-continuum/fast-syntax-highlighting  \
   zsh-users/zsh-history-substring-search \
   zsh-users/zsh-autosuggestions \
   zsh-users/zsh-completions
+
+[[ "$(uname)" != "Darwin" ]] && zinit light zdharma-continuum/fast-syntax-highlighting # this really slows down prompt typing on MacOS
 
 zinit lucid for \
     OMZL::clipboard.zsh \
@@ -142,28 +145,9 @@ zinit lucid for \
 # fi
 
 zinit cdreplay -q
-# --- END plugins
 
-# Pure Theme as described in https://github.com/zdharma-continuum/zinit?tab=readme-ov-file#more-examples
-# ---
-# zi light-mode for @sindresorhus/pure
-# prompt_newline='%666v'
-# PROMPT=" $PROMPT"
-# print() {
-#   [ 0 -eq $# -a "prompt_pure_precmd" = "${funcstack[-1]}" ] || builtin print "$@";
-# }
-# zi lucid for pick"/dev/null" multisrc"{async,pure}.zsh" \
-#   atload"!prompt_pure_precmd" nocd \
-#     sindresorhus/pure
-# ZSH_THEME=""
-# PURE_PROMPT_SYMBOL='$'
-# PURE_GIT_DOWN_ARROW='↓'
-# PURE_GIT_UP_ARROW='↑'
-# # Change slightly root's prompt 
-# if [ "$EUID" -eq 0 ]; then 
-#   PURE_PROMPT_SYMBOL="%f%F{red}#%f %F{magenta}$PURE_PROMPT_SYMBOL"
-# fi
-# autoload -U promptinit; promptinit
+ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets root line)
+# --- END plugins
 
 # Spaceship Theme
 # ---
@@ -186,7 +170,6 @@ SPACESHIP_CHAR_SYMBOL_SECONDARY=""
 SPACESHIP_CHAR_SYMBOL_FAILURE="$ "
 
 # Exit code section
-# Show exit_code section
 SPACESHIP_EXIT_CODE_SHOW=true
 SPACESHIP_EXIT_CODE_SYMBOL=''
 
@@ -196,13 +179,12 @@ SPACESHIP_USER_SHOW='always'
 SPACESHIP_USER_SUFFIX=''
 
 # Host section
-# Display host
 SPACESHIP_HOST_SHOW=true
-SPACESHIP_HOST_PREFIX='@'
 SPACESHIP_HOST_SUFFIX=''
+SPACESHIP_HOST_PREFIX='@'
 
 # Directory section
-SPACESHIP_DIR_PREFIX=''
+SPACESHIP_DIR_PREFIX=' '
 # Number of folders of cwd to show in prompt, 0 to show all
 SPACESHIP_DIR_TRUNC=0
 
@@ -223,15 +205,20 @@ SPACESHIP_GIT_STATUS_BEHIND='↓'
 SPACESHIP_GIT_STATUS_DELETED='X'
 SPACESHIP_GIT_STATUS_DIVERGED='↕'
 
-# Arch section
-SPACESHIP_ARCH_SYMBOL=''
-SPACESHIP_ARCH_PREFIX=' '
-SPACESHIP_ARCH_COLOR='red'
-
 # IP section
 SPACESHIP_IP_PREFIX=':'
 SPACESHIP_IP_SUFFIX=''
 SPACESHIP_IP_SYMBOL=''
+
+# venv section
+SPACESHIP_VENV_PREFIX="venv("
+SPACESHIP_VENV_SUFFIX=") "
+
+# Package section
+SPACESHIP_PACKAGE_PREFIX="pkg("
+SPACESHIP_PACKAGE_SUFFIX=") "
+SPACESHIP_PACKAGE_SYMBOL=""
+
 
 # Initialize prompt
 zinit light spaceship-prompt/spaceship-prompt
@@ -240,8 +227,6 @@ zinit light spaceship-prompt/spaceship-prompt
 [[ -f "$HOME/.config/custom.spaceship.zsh" ]] && source "$HOME/.config/custom.spaceship.zsh"
 
 # Custom sections
-zinit light windwhinny/spaceship-arch
-spaceship add arch
 zinit light TheArqsz/spaceship-ip
 spaceship add ip
 
@@ -253,12 +238,9 @@ SPACESHIP_PROMPT_ORDER=(
   user            # Username section
   host            # Hostname section
   ip              # IP section
-  arch            # Arch section https://github.com/windwhinny/spaceship-arch
   dir             # Current directory section
   git             # Git section (git_branch + git_status)
   package         # Package version
-  python          # Python section
-  docker          # Docker section
   docker_compose  # Docker section
   ansible         # Ansible section
   venv            # virtualenv section
@@ -280,13 +262,13 @@ zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}'
 # fzf
 # fzf installation https://github.com/junegunn/fzf?tab=readme-ov-file#using-git https://www.youtube.com/watch?v=ud7YxC33Z3w
 # ---
-if ! (( $+commands[fzf] )); then
+if ! (( $+commands[fzf] )) ; then
   echo "FZF is not installed - installing"
-  git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
-  "$HOME/.fzf/install" --no-zsh --no-bash --no-update-rc --no-completion --no-key-bindings --bin
-  echo "FZF was installed at `which fzf`."
-  echo "If you want it to be accessible by every user, copy it to /usr/bin/ with:"
-  echo "  sudo cp `which fzf` /usr/bin/"
+  [[ -d "$HOME/.fzf" ]] || git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
+  [[ -f "$HOME/.fzf/bin/fzf" ]] || "$HOME/.fzf/install" --no-zsh --no-bash --no-update-rc --no-completion --no-key-bindings --bin
+  echo "FZF was installed at $HOME/.fzf/bin/fzf"
+  echo "If you want it to be accessible by every user, copy it to /usr/local/bin/ with:"
+  echo "  sudo cp $HOME/.fzf/bin/fzf /usr/local/bin/"
 fi
 if [[ ! "$PATH" == *$HOME/.fzf/bin* ]]; then
   PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
@@ -320,8 +302,8 @@ bindkey "^[[1;5B" history-substring-search-down # Ctrl+Down
 bindkey '^[[1;5C' forward-word                  # Ctrl+Right
 bindkey '^[[1;5D' backward-word                 # Ctrl+Left
 bindkey "\e"t     tldr-command-line                 # ESC+t
-bindkey '^H' backward-kill-word # Ctrl+Backspace
-bindkey '5~' kill-word # Ctrl+Delete
+bindkey '^[^?' backward-kill-word # Alt+Backspace
+bindkey '^[[3;3~' kill-word # Alt+Delete
 # --- END Bindings
 
 # History
