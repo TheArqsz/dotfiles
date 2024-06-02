@@ -65,6 +65,8 @@ update_apt_get() {
     fi
 
     info "## Updating Ubuntu and installed packages"
+    info "## Before updating, please type your sudo password:"
+    sudo -v
 
     sudo apt update
     sudo apt upgrade -yq
@@ -75,8 +77,6 @@ update_apt_get() {
 }
 
 main() {
-    info "## Before updating, please type your sudo password:"
-    sudo -v
 
     update_dotfiles "$*"
     update_zinit "$*"
