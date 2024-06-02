@@ -1,0 +1,26 @@
+- defaults:
+    shell:
+      stdout: true
+      stderr: true
+
+- clean: ['~']
+
+- link:
+    ~/:
+      glob: true
+      path: ./files/.*
+      create: true
+      relink: true
+      force: true
+
+- create:
+    ~/.ssh:
+      mode: 0700
+    ~/.config:
+
+- shell:
+  - description: Installing submodules
+    command: git submodule update --init --recursive
+
+  - description: Setting up basic directory structure for ssh
+    command: chmod +x ./scripts/ssh.sh && ./scripts/ssh.sh

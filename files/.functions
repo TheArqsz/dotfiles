@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+# Enter a running Docker container.
+compdef '_docker run' dockenter
+function dockenter {
+ if [[ ! "$1" ]] ; then
+     echo "You must supply a container ID or name."
+     return 0
+ fi
+
+ docker exec -it $1 bash
+ return 0
+}
+
+# Extend $PATH without duplicates
+# https://github.com/denysdovhan/dotfiles/blob/master/home/.zshrc
+function extend_path {
+  [[ -d "$1" ]] || return
+
+  if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
+    export PATH="$1:$PATH"
+  fi
+  # Test
+}
+
+# Hide or show IP addr from Spaceship prompt
+function switch_prompt_ip {
+  local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"
+  [[ -f "$spaceship_custom_config" ]] || (mkdir -p "$(dirname $spaceship_custom_config)" && touch "$spaceship_custom_config" )
+
+  local sed_backup=""
+  [[ "$(uname)" == "Darwin" ]] && sed_backup="''"
+
+  if grep -q "SPACESHIP_IP_SHOW=true" "$spaceship_custom_config" >/dev/null; then
+    # Hide IP
+    sed -i$sed_backup 's/^SPACESHIP_IP_SHOW=true/SPACESHIP_IP_SHOW=false/' "$spaceship_custom_config"
+  elif grep -q "SPACESHIP_IP_SHOW=false" "$spaceship_custom_config" >/dev/null; then
+    # Show IP
+    sed -i$sed_backup 's/^SPACESHIP_IP_SHOW=false/SPACESHIP_IP_SHOW=true/' "$spaceship_custom_config"
+  else
+    echo "# Edited by switch_prompt_ip function" >> "$spaceship_custom_config"
+    echo "SPACESHIP_IP_SHOW=false" >> "$spaceship_custom_config"
+  fi
+  # Reload zsh
+  [[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
+}
+
+# Hide or show hostname from Spaceship prompt
+function switch_prompt_hostname {
+  local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"
+  [[ -f "$spaceship_custom_config" ]] || (mkdir -p "$(dirname $spaceship_custom_config)" && touch "$spaceship_custom_config" )
+
+  local sed_backup=""
+  [[ "$(uname)" == "Darwin" ]] && sed_backup="''"
+
+  if grep -q 'SPACESHIP_HOST_SHOW="always"' "$spaceship_custom_config" >/dev/null; then
+    # Hide hostname
+    sed -i$sed_backup 's/^SPACESHIP_HOST_SHOW="always"/SPACESHIP_HOST_SHOW=false/' "$spaceship_custom_config"
+  elif grep -q "SPACESHIP_HOST_SHOW=false" "$spaceship_custom_config" >/dev/null; then
+    # Show IP
+    sed -i$sed_backup 's/^SPACESHIP_HOST_SHOW=false/SPACESHIP_HOST_SHOW="always"/' "$spaceship_custom_config"
+  else
+    echo "# Edited by switch_prompt_hostname function" >> "$spaceship_custom_config"
+    echo "SPACESHIP_HOST_SHOW=false" >> "$spaceship_custom_config"
+  fi
+  # Reload zsh
+  [[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
+}
