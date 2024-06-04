@@ -94,8 +94,6 @@ bootstrap_code() {
                     sleep 2
                 }
         done
-        step "Installed extensions:"
-        code --list-extensions
     else
         step "VSCode doesn't exist and cannot be installed automatically"
     fi
@@ -105,9 +103,9 @@ bootstrap_code() {
             cp "$DOTFILES/misc/vscode-settings.json" "$HOME/Library/Application Support/Code/User/settings.json"
     elif [[ "$(uname -r)" == *"microsoft"* ]]; then
         local APPDATA="$(cmd.exe /c echo %APPDATA% 2>/dev/null)"
-        echo "Copy $DOTFILES/misc/vscode-settings.json to $APPDATA\\Code\\\User\\settings.json"
-        echo "You can use this shared path:"
-        echo "      $(wslpath $APPDATA)/Code/User/settings.json"
+        echo
+        echo "Copy $DOTFILES/misc/vscode-settings.json to $(wslpath $APPDATA)/Code/User/settings.json"
+        echo
     elif [[ "$(uname)" == "Linux" ]]; then
         mkdir -p "$HOME/.config/Code/User/" && \
             cp "$DOTFILES/misc/vscode-settings.json" "$HOME/.config/Code/User/settings.json"

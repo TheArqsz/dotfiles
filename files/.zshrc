@@ -302,16 +302,55 @@ eval "$(fzf --zsh)"
 
 # Bindings
 # ---
+# https://unix.stackexchange.com/a/420414
+# Stop keystroke on directory delimiter /
+# Alt+Backspace
+backward-kill-dir () {
+    local WORDCHARS=${WORDCHARS/\/}
+    zle backward-kill-word
+    zle -f kill  # Ensures that after repeated backward-kill-dir, Ctrl+Y will restore all of them.
+}
+zle -N backward-kill-dir
+# Alt+Left
+backward-word-dir () {
+    local WORDCHARS=${WORDCHARS/\/}
+    zle backward-word
+}
+zle -N backward-word-dir
+# Alt+Right
+forward-word-dir () {
+    local WORDCHARS=${WORDCHARS/\/}
+    zle forward-word
+}
+zle -N forward-word-dir
+# Alt+Delete
+kill-dir () {
+    local WORDCHARS=${WORDCHARS/\/}
+    zle kill-word
+}
+zle -N kill-dir
+
 bindkey -e    # Emacs keybindings
-bindkey "^[[1;5A"   history-substring-search-up     # Ctrl+Up
-bindkey "^[[1;5B"   history-substring-search-down   # Ctrl+Down
+bindkey "^A"   history-substring-search-up     # Ctrl+Up
+bindkey "^B"   history-substring-search-down   # Ctrl+Down
+# Commenting out default bindings in place of defined above
 # bindkey '^[[1;5C' forward-word                  # Ctrl+Right
 # bindkey '^[[1;5D' backward-word                 # Ctrl+Left
-bindkey '^[[3;3C'   forward-word                    # Alt+Right/Opt+Right
-bindkey '^[[3;3D'   backward-word                   # Alt+Left/Opt+Left
+# bindkey '^[C'       forward-word                    # Alt+Right/Opt+Right
+# bindkey '^[[1;3C'   forward-word                    # Alt+Right/Opt+Right
+bindkey '^[C'       forward-word-dir                    # Alt+Right/Opt+Right
+bindkey '^[[1;3C'   forward-word-dir                    # Alt+Right/Opt+Right
+# bindkey '^[D'       backward-word                   # Alt+Left/Opt+Left
+# bindkey '^[[1;3D'   backward-word                   # Alt+Left/Opt+Left
+bindkey '^[D'       backward-word-dir                   # Alt+Left/Opt+Left
+bindkey '^[[1;3D'   backward-word-dir                   # Alt+Left/Opt+Left
 bindkey "\e"t       tldr-command-line               # ESC+t
-bindkey '^[^?'      backward-kill-word              # Alt+Backspace/Opt+Backspace
-bindkey '^[[3;3~'   kill-word                       # Alt+Delete/Opt+Delete
+# bindkey '^[^?'      backward-kill-word              # Alt+Backspace/Opt+Backspace
+bindkey '^[^?'      backward-kill-dir              # Alt+Backspace/Opt+Backspace
+# bindkey '^[~'   kill-word                       # Alt+Delete/Opt+Delete
+# bindkey '^[[3;3~'   kill-word                       # Alt+Delete/Opt+Delete
+bindkey '^[~'   kill-dir                       # Alt+Delete/Opt+Delete
+bindkey '^[[3;3~'   kill-dir                       # Alt+Delete/Opt+Delete
 # --- END Bindings
 
 # History
