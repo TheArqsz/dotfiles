@@ -303,13 +303,15 @@ eval "$(fzf --zsh)"
 # Bindings
 # ---
 bindkey -e    # Emacs keybindings
-bindkey "^[[1;5A" history-substring-search-up   # Ctrl+Up
-bindkey "^[[1;5B" history-substring-search-down # Ctrl+Down
-bindkey '^[[1;5C' forward-word                  # Ctrl+Right
-bindkey '^[[1;5D' backward-word                 # Ctrl+Left
-bindkey "\e"t     tldr-command-line                 # ESC+t
-bindkey '^[^?' backward-kill-word # Alt+Backspace
-bindkey '^[[3;3~' kill-word # Alt+Delete
+bindkey "^[[1;5A"   history-substring-search-up     # Ctrl+Up
+bindkey "^[[1;5B"   history-substring-search-down   # Ctrl+Down
+# bindkey '^[[1;5C' forward-word                  # Ctrl+Right
+# bindkey '^[[1;5D' backward-word                 # Ctrl+Left
+bindkey '^[[3;3C'   forward-word                    # Alt+Right/Opt+Right
+bindkey '^[[3;3D'   backward-word                   # Alt+Left/Opt+Left
+bindkey "\e"t       tldr-command-line               # ESC+t
+bindkey '^[^?'      backward-kill-word              # Alt+Backspace/Opt+Backspace
+bindkey '^[[3;3~'   kill-word                       # Alt+Delete/Opt+Delete
 # --- END Bindings
 
 # History

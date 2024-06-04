@@ -1,0 +1,32 @@
+{
+  "editor.accessibilitySupport": "off",
+  "workbench.colorTheme": "Monokai Dimmed",
+  "terminal.integrated.defaultProfile.linux": "/bin/zsh",
+  "redhat.telemetry.enabled": false,
+  "pasteImage.insertPattern": "<figure>\n\t<img src=\"${imageFilePath}\"/>\n\t<figcaption><center><i>OPIS</i></center></figcaption>\n</figure>",
+  "pasteImage.path": "${currentFileDir}/images",
+  "nginx-conf-hint.format.align": true,
+  "editor.codeActionsOnSave": {},
+  "editor.wordWrap": "on",
+  "telemetry.telemetryLevel": "off",
+  "window.zoomLevel": 1,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "[python]": {
+    "editor.formatOnType": true,
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[javascript]": {
+      "editor.tabSize": 2
+  },
+  "[json]": {
+      "editor.tabSize": 2
+  },
+  "[nginx]": {
+      "editor.tabSize": 2,
+      "editor.defaultFormatter": "ahmadalli.vscode-nginx-conf"
+  }
+}

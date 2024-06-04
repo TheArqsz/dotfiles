@@ -4,20 +4,18 @@
 # Inspired by https://github.com/denysdovhan/dotfiles/blob/master/scripts/update
 
 # Set directory
-export DOTFILES=${1:-"$HOME/.dotfiles"}
+export DOTFILES=${DOTFILES:-"$HOME/.dotfiles"}
 
 _exists() {
     command -v "$1" > /dev/null 2>&1
 }
 
-# Success reporter
 info() {
     echo -e "${*}"
 }
 
-# End section
 finished() {
-    success "Finished updating $1"
+    info "Finished updating $1"
     echo
     sleep 1
 }
@@ -60,7 +58,7 @@ update_brew() {
 }
 
 update_apt_get() {
-    if ! _exists apt; then
+    if ! _exists apt || [[ "$(uname)" != "Linux" ]]; then
         return
     fi
 
