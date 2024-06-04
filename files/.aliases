@@ -35,3 +35,6 @@ alias reload="source $HOME/.zshrc"
 alias -- +x='chmod +x'
 
 alias update="source $DOTFILES/scripts/update.sh"
+
+alias bootstrap="zsh $DOTFILES/scripts/bootstrap.sh"
+alias -- bootstrap.sh="zsh $DOTFILES/scripts/bootstrap.sh"

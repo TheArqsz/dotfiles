@@ -10,12 +10,10 @@ _exists() {
     command -v "$1" > /dev/null 2>&1
 }
 
-# Success reporter
 info() {
     echo -e "${*}"
 }
 
-# End section
 finished() {
     info "Finished updating $1"
     echo
@@ -60,7 +58,7 @@ update_brew() {
 }
 
 update_apt_get() {
-    if ! _exists apt; then
+    if ! _exists apt || [[ "$(uname)" != "Linux" ]]; then
         return
     fi
 
