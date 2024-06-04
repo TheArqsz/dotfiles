@@ -109,10 +109,10 @@ zinit for \
     lucid \
     wait \
   zsh-hooks/zsh-hooks \
-  zsh-users/zsh-history-substring-search \
   zsh-users/zsh-autosuggestions \
   zsh-users/zsh-completions
 
+zinit light zsh-users/zsh-history-substring-search
 [[ "$(uname)" != "Darwin" ]] && zinit light zdharma-continuum/fast-syntax-highlighting # this really slows down prompt typing on MacOS
 
 zinit lucid for \
@@ -331,26 +331,31 @@ kill-dir () {
 zle -N kill-dir
 
 bindkey -e    # Emacs keybindings
-bindkey "^A"   history-substring-search-up     # Ctrl+Up
-bindkey "^B"   history-substring-search-down   # Ctrl+Down
+# Double bind because...WSL
+bindkey "^A"                        history-substring-search-up                     # Ctrl+Up
+bindkey '^[[1;5A'                   history-substring-search-up                     # Ctrl+Up
+bindkey "^B"                        history-substring-search-down                   # Ctrl+Down
+bindkey '^[[1;5B'                   history-substring-search-up                     # Ctrl+Down
+# Setting this to make it work on Mac and Linux with Ctrl and Opt/Alt
+bindkey '^C'                        forward-word                                    # Ctrl+Right
+bindkey '^D'                        backward-word                                   # Ctrl+Left
 # Commenting out default bindings in place of defined above
-# bindkey '^[[1;5C' forward-word                  # Ctrl+Right
-# bindkey '^[[1;5D' backward-word                 # Ctrl+Left
-# bindkey '^[C'       forward-word                    # Alt+Right/Opt+Right
-# bindkey '^[[1;3C'   forward-word                    # Alt+Right/Opt+Right
-bindkey '^[C'       forward-word-dir                    # Alt+Right/Opt+Right
-bindkey '^[[1;3C'   forward-word-dir                    # Alt+Right/Opt+Right
-# bindkey '^[D'       backward-word                   # Alt+Left/Opt+Left
-# bindkey '^[[1;3D'   backward-word                   # Alt+Left/Opt+Left
-bindkey '^[D'       backward-word-dir                   # Alt+Left/Opt+Left
-bindkey '^[[1;3D'   backward-word-dir                   # Alt+Left/Opt+Left
-bindkey "\e"t       tldr-command-line               # ESC+t
-# bindkey '^[^?'      backward-kill-word              # Alt+Backspace/Opt+Backspace
-bindkey '^[^?'      backward-kill-dir              # Alt+Backspace/Opt+Backspace
-# bindkey '^[~'   kill-word                       # Alt+Delete/Opt+Delete
-# bindkey '^[[3;3~'   kill-word                       # Alt+Delete/Opt+Delete
-bindkey '^[~'   kill-dir                       # Alt+Delete/Opt+Delete
-bindkey '^[[3;3~'   kill-dir                       # Alt+Delete/Opt+Delete
+# bindkey '^[C'                       forward-word                                    # Alt+Right/Opt+Right
+# bindkey '^[[1;3C'                   forward-word                                    # Alt+Right/Opt+Right
+bindkey '^[C'                       forward-word-dir                                # Alt+Right/Opt+Right
+bindkey '^[[1;3C'                   forward-word-dir                                # Alt+Right/Opt+Right
+# bindkey '^[D'                       backward-word                                   # Alt+Left/Opt+Left
+# bindkey '^[[1;3D'                   backward-word                                   # Alt+Left/Opt+Left
+bindkey '^[D'                       backward-word-dir                               # Alt+Left/Opt+Left
+bindkey '^[[1;3D'                   backward-word-dir                               # Alt+Left/Opt+Left
+bindkey "\e"t                       tldr-command-line                               # ESC+t
+# bindkey '^[^?'                      backward-kill-word                              # Alt+Backspace/Opt+Backspace
+bindkey '^[^?'                      backward-kill-dir                               # Alt+Backspace/Opt+Backspace
+# bindkey '^[~'                       kill-word                                       # Alt+Delete/Opt+Delete
+# bindkey '^[[3;3~'                   kill-word                                       # Alt+Delete/Opt+Delete
+bindkey '^[~'                       kill-dir                                        # Alt+Delete/Opt+Delete
+bindkey '^[[3;3~'                   kill-dir                                        # Alt+Delete/Opt+Delete
+
 # --- END Bindings
 
 # History
