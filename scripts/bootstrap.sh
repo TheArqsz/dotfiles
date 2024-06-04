@@ -3,6 +3,8 @@
 #
 # Copyright 2024 TheArqsz
 
+export DOTFILES=${DOTFILES:-"$HOME/.dotfiles"}
+
 _cmd_exists() {
     command -v "$1" > /dev/null 2>&1
 }
@@ -96,6 +98,19 @@ bootstrap_code() {
         code --list-extensions
     else
         step "VSCode doesn't exist and cannot be installed automatically"
+    fi
+
+    if [[ "$(uname)" == "Darwin" ]]; then
+        mkdir -p "$HOME/Library/Application Support/Code/User/" && \
+            cp "$DOTFILES/misc/vscode-settings.json" "$HOME/Library/Application Support/Code/User/settings.json"
+    elif [[ "$(uname -r)" == *"microsoft"* ]]; then
+        local APPDATA="$(cmd.exe /c echo %APPDATA% 2>/dev/null)"
+        echo "Copy $DOTFILES/misc/vscode-settings.json to $APPDATA\\Code\\\User\\settings.json"
+        echo "You can use this shared path:"
+        echo "      $(wslpath $APPDATA)/Code/User/settings.json"
+    elif [[ "$(uname)" == "Linux" ]]; then
+        mkdir -p "$HOME/.config/Code/User/" && \
+            cp "$DOTFILES/misc/vscode-settings.json" "$HOME/.config/Code/User/settings.json"
     fi
 
 }
