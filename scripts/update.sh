@@ -4,7 +4,7 @@
 # Inspired by https://github.com/denysdovhan/dotfiles/blob/master/scripts/update
 
 # Set directory
-export DOTFILES=${1:-"$HOME/.dotfiles"}
+export DOTFILES=${DOTFILES:-"$HOME/.dotfiles"}
 
 _exists() {
     command -v "$1" > /dev/null 2>&1
@@ -17,7 +17,7 @@ info() {
 
 # End section
 finished() {
-    success "Finished updating $1"
+    info "Finished updating $1"
     echo
     sleep 1
 }
