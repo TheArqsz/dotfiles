@@ -1,0 +1,35 @@
+{
+  "brave": {
+    "ad_block": {
+      "checked_all_default_regions": true,
+      "list_subscriptions": {
+        "https://hole.cert.pl/domains/v2/domains_adblock.txt": {
+          "enabled": true,
+          "expires": 1,
+          "last_successful_update_attempt": "0",
+          "last_update_attempt": "0",
+          "homepage": "https://cert.pl/news/single/ostrzezenia_phishing/",
+          "title": "CERT.PL's Warning List"
+        }
+      },
+      "regional_filters": {
+        "2D57ADED-3531-419A-9DED-7F8868BC1561": {
+          "enabled": true
+        },
+        "7911A1CB-304E-4CDB-ABB3-E2A94A37E4DD": {
+          "enabled": true
+        },
+        "867EF333-8336-455C-9CC6-98749AEE69E4": {
+          "enabled": true
+        },
+        "9E8EC586-4E17-4E5E-99D7-35172C4CEA74": {
+          "enabled": true
+        },
+        "BF9234EB-4CB7-4CED-9FCB-F1FD31B0666C": {
+          "enabled": true
+        }
+      }
+    },
+    "dark_mode": 1
+  }
+}

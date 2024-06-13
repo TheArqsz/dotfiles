@@ -7,7 +7,7 @@
 # Skipping Ubuntu system-wide compinit
 # https://gist.github.com/ctechols/ca1035271ad134841284?permalink_comment_id=3401477#gistcomment-3401477
 if [[ -f /etc/os-release ]] && [[ "$(awk -F= '/^NAME/{print $2}' /etc/os-release)" == *"Ubuntu"* ]]; then
-    export skip_global_compinit=1
+  export skip_global_compinit=1
 fi
 
 # TERM
@@ -59,16 +59,16 @@ fi
 
 # Tmux on ssh
 if [[ -n "$PS1" ]] && [[ -z "$TMUX" ]] && [[ -n "$SSH_CONNECTION" ]]; then
-    tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
+  tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
 fi
 
 # Zinit's installer
 # ---
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 if [[ ! -d "${ZINIT_HOME}" ]]; then
-   mkdir -p "$(dirname $ZINIT_HOME)" &&  chmod g-rwX "${ZINIT_HOME}"
-   git clone https://github.com/zdharma-continuum/zinit "${ZINIT_HOME}" || \
-    print -P "The zinit installation has failed."
+  mkdir -p "$(dirname $ZINIT_HOME)" &&  chmod g-rwX "${ZINIT_HOME}"
+  git clone https://github.com/zdharma-continuum/zinit "${ZINIT_HOME}" || \
+  print -P "The zinit installation has failed."
 fi
 
 source "${ZINIT_HOME}/zinit.zsh"
@@ -98,32 +98,32 @@ PS1="$ "
 # ---
 # Must load OMZ library git before others
 zinit lucid for \
-        OMZL::git.zsh \
-        OMZP::git
+OMZL::git.zsh \
+OMZP::git
 
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 zinit for \
-    atload"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
-    blockf \
-    lucid \
-    wait \
-  zsh-hooks/zsh-hooks \
-  zsh-users/zsh-autosuggestions \
-  zsh-users/zsh-completions
+atload"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
+blockf \
+lucid \
+wait \
+zsh-hooks/zsh-hooks \
+zsh-users/zsh-autosuggestions \
+zsh-users/zsh-completions
 
 zinit light zsh-users/zsh-history-substring-search
 [[ "$(uname)" != "Darwin" ]] && zinit light zdharma-continuum/fast-syntax-highlighting # this really slows down prompt typing on MacOS
 
 zinit lucid for \
-    OMZL::clipboard.zsh \
-    OMZP::copyfile \
-    OMZP::systemd \
-    OMZP::pip \
-    Aloxaf/fzf-tab \
-    OMZP::eza \
-    OMZP::tldr \
-    OMZP::command-not-found 
+OMZL::clipboard.zsh \
+OMZP::copyfile \
+OMZP::systemd \
+OMZP::pip \
+Aloxaf/fzf-tab \
+OMZP::eza \
+OMZP::tldr \
+OMZP::command-not-found
 
 # zinit ice as"completion"; zinit snippet https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker
 
@@ -131,10 +131,10 @@ zinit lucid for \
 # https://gist.github.com/ctechols/ca1035271ad134841284
 # autoload -Uz compinit
 # if [[ -f "$HOME/.zcompdump" ]]; then
-#   # Check if the cached .zcompdump file must be regenerated once a day 
+#   # Check if the cached .zcompdump file must be regenerated once a day
 #   # (today as a day in the year vs the time of .zcompdump creation in a day of a year)
 #   if [ $(date +%j) != $(date -r "$HOME/.zcompdump" +%j) ]; then
-#     compinit 
+#     compinit
 #   else
 #     # Use cached
 #     # compinit -C - not working? gonna fix it in the future
@@ -158,7 +158,7 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets root line)
 # Spaceship Theme
 # ---
 # Prompt
-# Adds a newline character before each prompt line 
+# Adds a newline character before each prompt line
 SPACESHIP_PROMPT_ADD_NEWLINE=true
 # Make the prompt span across two lines
 SPACESHIP_PROMPT_SEPARATE_LINE=true
@@ -257,7 +257,7 @@ SPACESHIP_PROMPT_ORDER=(
   char            # Prompt character
 )
 
-# --- END Theme 
+# --- END Theme
 
 # Case insensitive.
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
@@ -289,15 +289,15 @@ export FZF_DEFAULT_OPTS="--ansi"
 zstyle ':completion:*' menu yes
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':fzf-tab:complete:(cd|ls|lsd|exa|eza|bat|cat|emacs|nano|vi|vim):*' \
-       fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -1 --color=always $realpath'
+fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -1 --color=always $realpath'
 zstyle ':fzf-tab:complete:(-command-|-parameter-|-brace-parameter-|export|unset|expand):*' \
-	   fzf-preview 'echo ${(P)word}'
+fzf-preview 'echo ${(P)word}'
 zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup # https://github.com/Aloxaf/fzf-tab?tab=readme-ov-file#tmux
 # Preivew `systemctl` command
 # https://github.com/seagle0128/dotfiles/blob/master/.zshrc
 zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
 zstyle ':fzf-tab:*' switch-group '<' '>'
-eval "$(fzf --zsh)" 
+eval "$(fzf --zsh)"
 # --- END fzf
 
 # Bindings
@@ -306,27 +306,27 @@ eval "$(fzf --zsh)"
 # Stop keystroke on directory delimiter /
 # Alt+Backspace
 backward-kill-dir () {
-    local WORDCHARS=${WORDCHARS/\/}
-    zle backward-kill-word
-    zle -f kill  # Ensures that after repeated backward-kill-dir, Ctrl+Y will restore all of them.
+  local WORDCHARS=${WORDCHARS/\/}
+  zle backward-kill-word
+  zle -f kill  # Ensures that after repeated backward-kill-dir, Ctrl+Y will restore all of them.
 }
 zle -N backward-kill-dir
 # Alt+Left
 backward-word-dir () {
-    local WORDCHARS=${WORDCHARS/\/}
-    zle backward-word
+  local WORDCHARS=${WORDCHARS/\/}
+  zle backward-word
 }
 zle -N backward-word-dir
 # Alt+Right
 forward-word-dir () {
-    local WORDCHARS=${WORDCHARS/\/}
-    zle forward-word
+  local WORDCHARS=${WORDCHARS/\/}
+  zle forward-word
 }
 zle -N forward-word-dir
 # Alt+Delete
 kill-dir () {
-    local WORDCHARS=${WORDCHARS/\/}
-    zle kill-word
+  local WORDCHARS=${WORDCHARS/\/}
+  zle kill-word
 }
 zle -N kill-dir
 
@@ -374,13 +374,25 @@ setopt 	extended_history	# Record timestamp of command in HISTFILE
 # --- END History
 
 # Other ZSH options
-setopt	autocd			# Use the name of a directory instead of "cd name" 
+setopt	autocd			# Use the name of a directory instead of "cd name"
 
 # Brew specific
 # ---
+if [ -d "/home/linuxbrew/.linuxbrew/bin/" ] && ! (( $+commands[brew] )); then
+  export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+fi
 if (( $+commands[brew] )); then
-    # Tell homebrew to autoupdate just once a week
-    export HOMEBREW_AUTO_UPDATE_SECS=604800
-    fpath+=("$(brew --prefix)/share/zsh/site-functions")       
+  # Tell homebrew to autoupdate just once a week
+  export HOMEBREW_AUTO_UPDATE_SECS=604800
+  fpath+=("$(brew --prefix)/share/zsh/site-functions")
 fi
 # --- END Brew
+
+# Golang
+# ---
+if [ -d "/usr/local/go/bin" ] && ! (( $+commands[go] )); then
+  mkdir -p "$HOME/go" && \
+  export GOPATH="$HOME/go"
+  export PATH="/usr/local/go/bin:$GOPATH/bin:$PATH"
+fi
+# ---
