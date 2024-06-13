@@ -109,7 +109,8 @@ post_setup_burp() {
     if ! _cmd_exists burpsuite && ! _cmd_exists BurpSuitePro; then
         step "Installing Burp Suite"
         local LATEST_VERSION="$(curl -s https://portswigger.net/burp/releases | \grep -E 'Professional / Community [0-9]{4}\.[0-9]+(\.[0-9]+)?' | awk -F 'Community ' '{print $2}' | cut -d'<' -f1 | head -n1)"
-        curl -sL 'https://portswigger-cdn.net/burp/releases/download?product=pro&version='$LATEST_VERSION'&type=Linux' -o burp_installer
+        step "  Downloading official installer"
+        curl -# -SL 'https://portswigger-cdn.net/burp/releases/download?product=pro&version='$LATEST_VERSION'&type=Linux' -o burp_installer
         chmod +x ./burp_installer && sudo ./burp_installer
         rm ./burp_installer
         step "Burp Suite is installed"
@@ -314,7 +315,8 @@ bootstrap_golang() {
         fi
         step "Installing Golang"
         GO_LATEST_VERSION_ENDPOINT=$(curl -sL https://go.dev/dl/ | \grep 'download.*downloadBox' | \grep -io "/dl/.*$(uname -s).*gz")
-        curl -SL "https://go.dev/$GO_LATEST_VERSION_ENDPOINT" --output golang.tar.gz
+        step "  Downloading official binary"
+        curl -# -SL "https://go.dev/$GO_LATEST_VERSION_ENDPOINT" --output golang.tar.gz
         sudo tar -C /usr/local -xzf golang.tar.gz && \
         rm golang.tar.gz
         step "Golang installed"
@@ -340,7 +342,8 @@ bootstrap_fdfind() {
     if ! _cmd_exists fdfind && ! _cmd_exists fd; then
         step "Installing fdfind"
         FD_LATEST_VERSION=$(curl -sL https://github.com/sharkdp/fd/releases | \grep -E 'fd/tree/v[0-9]+' | awk -F'/v' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
-        curl -sSL "https://github.com/sharkdp/fd/releases/download/v$FD_LATEST_VERSION/fd-musl_${FD_LATEST_VERSION}_$(dpkg --print-architecture).deb" --output fd.deb
+        step "  Downloading official release"
+        curl -# -SL "https://github.com/sharkdp/fd/releases/download/v$FD_LATEST_VERSION/fd-musl_${FD_LATEST_VERSION}_$(dpkg --print-architecture).deb" --output fd.deb
         sudo dpkg -i fd.deb && \
         sudo ln -s /usr/bin/fd /usr/bin/fdfind
     else
@@ -367,28 +370,35 @@ bootstrap_eza() {
 
 bootstrap_tmux() {
     echo
+    TMUX_LATEST_VERSION=$(curl -sL https://github.com/tmux/tmux/releases | \grep -E 'tmux/tree/' | awk -F'tree/' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
     if _cmd_exists tmux; then
-        step "Tmux is already installed - updating"
-        sudo apt-get remove -yqq tmux 2>/dev/null
-        # If still exists
-        if _cmd_exists tmux; then
-            step "Force removing old tmux (was not installed with apt)"
-            sudo rm -f $(which tmux) 2>/dev/null
+        if [[ "tmux $TMUX_LATEST_VERSION" == "$(tmux -V)" ]]; then
+            step "Tmux is already installed and updated to the latest version"
+            return
+        else
+            step "Tmux is already installed - updating"
+            sudo apt-get remove -yqq tmux 2>/dev/null
+            # If still exists
+            if _cmd_exists tmux; then
+                step "Force removing old tmux (was not installed with apt)"
+                sudo rm -f $(which tmux) 2>/dev/null
+            fi
         fi
     fi
     step "Installing Tmux dependencies"
     sudo apt-get install -yqq libevent-dev ncurses-dev build-essential bison pkg-config
     step "Installing Tmux"
-    TMUX_LATEST_VERSION=$(curl -sL https://github.com/tmux/tmux/releases | \grep -E 'tmux/tree/' | awk -F'tree/' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
     step "  Installing version $TMUX_LATEST_VERSION"
-    curl -sSL "https://github.com/tmux/tmux/releases/download/$TMUX_LATEST_VERSION/tmux-${TMUX_LATEST_VERSION}.tar.gz" --output /tmp/tmux.tar.gz
-    sudo tar -C /tmp/ -zxf /tmp/tmux.tar.gz
+    step "  Downloading official release"
+    curl -# -SL "https://github.com/tmux/tmux/releases/download/$TMUX_LATEST_VERSION/tmux-${TMUX_LATEST_VERSION}.tar.gz" --output /tmp/tmux_${TMUX_LATEST_VERSION}.tar.gz
+    sudo tar -C /tmp/ -zxf /tmp/tmux_${TMUX_LATEST_VERSION}.tar.gz
     cd /tmp/tmux-$TMUX_LATEST_VERSION/
     step "  Running configure"
     sudo ./configure 1>/dev/null
     step "  Running make and make install"
-    sudo make 1>/dev/null && sudo make install 1>/dev/null
-    cd - && sudo rm -rf /tmp/tmux-$TMUX_LATEST_VERSION_ENDPOINT/
+    sudo make 1>/dev/null && sudo make install 1>/dev/null && \
+    sudo rm -rf /tmp/tmux-$TMUX_LATEST_VERSION/
+    cd -
     tmux kill-server 2>/dev/null
     step "Tmux installed"
 }
