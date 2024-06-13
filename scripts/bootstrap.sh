@@ -165,6 +165,7 @@ vscode_base_extensions=(
 )
 
 bootstrap_code() {
+    echo
     step "Setting up VSCode with extensions"
     # WSL
     if ! _cmd_exists code && [[ "$(uname -r)" == *"microsoft"* ]]; then
@@ -233,6 +234,7 @@ bootstrap_code() {
 }
 
 bootstrap_docker() {
+    echo
     # Debian-based system
     if ! _cmd_exists docker && [[ -f "/etc/debian_version" ]]; then
         _cmd_exists apt-get || {
@@ -292,6 +294,7 @@ bootstrap_docker() {
 }
 
 bootstrap_updog() {
+    echo
     if ! _cmd_exists updog; then
         step "Installing updog"
         pip install --upgrade updog
@@ -301,6 +304,7 @@ bootstrap_updog() {
 }
 
 bootstrap_golang() {
+    echo
     if ! _cmd_exists go; then
         if ! _cmd_exists curl; then
             step "Installing Go dependency - curl"
@@ -318,6 +322,7 @@ bootstrap_golang() {
 }
 
 bootstrap_fzf() {
+    echo
     if ! _cmd_exists fzf; then
         step "Installing FZF"
         [[ -d "$HOME/.fzf" ]] || git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
@@ -329,6 +334,7 @@ bootstrap_fzf() {
 }
 
 bootstrap_fdfind() {
+    echo
     if ! _cmd_exists fdfind && ! _cmd_exists fd; then
         step "Installing fdfind"
         FD_LATEST_VERSION=$(curl -sL https://github.com/sharkdp/fd/releases | \grep -E 'fd/tree/v[0-9]+' | awk -F'/v' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
@@ -341,6 +347,7 @@ bootstrap_fdfind() {
 }
 
 bootstrap_eza() {
+    echo
     if ! _cmd_exists eza; then
         step "Installing eza dependencies"
         sudo apt-get install -yqq curl gpg
@@ -357,6 +364,7 @@ bootstrap_eza() {
 }
 
 bootstrap_brew() {
+    echo
     # Debian-based system
     if ! _cmd_exists brew && [[ -f "/etc/debian_version" ]]; then
         _cmd_exists apt-get || {
