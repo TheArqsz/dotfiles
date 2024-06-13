@@ -365,6 +365,34 @@ bootstrap_eza() {
     fi
 }
 
+bootstrap_tmux() {
+    echo
+    if _cmd_exists tmux; then
+        step "Tmux is already installed - updating"
+        sudo apt-get remove -yqq tmux 2>/dev/null
+        # If still exists
+        if _cmd_exists tmux; then
+            step "Force removing old tmux (was not installed with apt)"
+            sudo rm -f $(which tmux) 2>/dev/null
+        fi
+    fi
+    step "Installing Tmux dependencies"
+    sudo apt-get install -yqq libevent-dev ncurses-dev build-essential bison pkg-config
+    step "Installing Tmux"
+    TMUX_LATEST_VERSION=$(curl -sL https://github.com/tmux/tmux/releases | \grep -E 'tmux/tree/' | awk -F'tree/' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+    step "  Installing version $TMUX_LATEST_VERSION"
+    curl -sSL "https://github.com/tmux/tmux/releases/download/$TMUX_LATEST_VERSION/tmux-${TMUX_LATEST_VERSION}.tar.gz" --output /tmp/tmux.tar.gz
+    sudo tar -C /tmp/ -zxf /tmp/tmux.tar.gz
+    cd /tmp/tmux-$TMUX_LATEST_VERSION/
+    step "  Running configure"
+    sudo ./configure 1>/dev/null
+    step "  Running make and make install"
+    sudo make 1>/dev/null && sudo make install 1>/dev/null
+    cd - && sudo rm -rf /tmp/tmux-$TMUX_LATEST_VERSION_ENDPOINT/
+    tmux kill-server 2>/dev/null
+    step "Tmux installed"
+}
+
 bootstrap_brew() {
     echo
     # Debian-based system
