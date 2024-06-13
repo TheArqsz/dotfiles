@@ -66,10 +66,10 @@ update_apt_get() {
     info "## Before updating, please type your sudo password:"
     sudo -v
 
-    sudo apt update
-    sudo apt upgrade -yq
-    sudo apt autoremove -yq
-    sudo apt autoclean -yq
+    sudo apt update -yqq
+    sudo apt upgrade -yqq
+    sudo apt autoremove -yqq
+    sudo apt autoclean -yqq
 
     finished update_apt_get
 }
