@@ -39,7 +39,8 @@ setopt interactive_comments
 
 # Python Pyenv
 # ---
-export DEFAULT_PYENV_PYTHON_VERSION=3.10.7
+export DEFAULT_PYENV_PYTHON_VERSION=3.11.9
+export FALLBACK_PYENV_PYTHON_VERSION=3.10.7
 # Initialization takes huge portion of time when shell is started
 # Temporary workaround: https://github.com/pyenv/pyenv/issues/2918#issuecomment-1977029534
 pyenv() {
@@ -50,9 +51,15 @@ if [[ -d "$HOME/.pyenv" ]]; then
   export PYENV_ROOT="$HOME/.pyenv"
   [[ -d "$PYENV_ROOT/bin" ]] && export PATH="$PYENV_ROOT/bin:$PATH"
   if ! (( $+commands[python] )) || [ "$(which python)" != "$PYENV_ROOT/shims/python" ]; then
-    pyenv install -s $DEFAULT_PYENV_PYTHON_VERSION
-    pyenv global $DEFAULT_PYENV_PYTHON_VERSION
-    exec zsh
+    if pyenv install -l | \grep -q $DEFAULT_PYENV_PYTHON_VERSION 2>/dev/null; then
+      pyenv install -s $DEFAULT_PYENV_PYTHON_VERSION
+      pyenv global $DEFAULT_PYENV_PYTHON_VERSION
+      exec zsh
+    else
+      pyenv install -s $FALLBACK_PYENV_PYTHON_VERSION
+      pyenv global $FALLBACK_PYENV_PYTHON_VERSION
+      exec zsh
+    fi
   fi
 fi
 # --- END Python Pyenv

@@ -343,10 +343,14 @@ bootstrap_fzf() {
 bootstrap_pyenv() {
     echo
     if ! _cmd_exists pyenv; then
+        step "Installing pyenv dependencies"
+        sudo apt-get install --show-progress -yqq build-essential libssl-dev zlib1g-dev \
+            libbz2-dev libreadline-dev libsqlite3-dev curl git \
+            libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev llvm
         step "Installing pyenv"
         [[ -d "$HOME/.pyenv" ]] || git clone https://github.com/pyenv/pyenv.git "$HOME/.pyenv"
         export PATH="$HOME/.pyenv/bin:$PATH"
-        pyenv init -
+        source "$HOME/.zshrc"
     else
         step "pyenv is already installed"
     fi
