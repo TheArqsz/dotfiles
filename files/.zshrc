@@ -384,6 +384,8 @@ fi
 if (( $+commands[brew] )); then
   # Tell homebrew to autoupdate just once a week
   export HOMEBREW_AUTO_UPDATE_SECS=604800
+  export HOMEBREW_NO_ANALYTICS=true
+  export HOMEBREW_NO_EMOJI=true
   fpath+=("$(brew --prefix)/share/zsh/site-functions")
 fi
 # --- END Brew
