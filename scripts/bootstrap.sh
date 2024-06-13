@@ -37,7 +37,7 @@ post_setup_signal_desktop() {
         step "Installing Signal Desktop"
         if ! _cmd_exists gpg; then
             step "Installing Signal Desktop dependency - gpg"
-            sudo apt-get install -yqq gpg
+            sudo apt-get install --show-progress -yqq gpg
         fi
         # https://signal.org/download/linux/
         wget -q -O- https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor >signal-desktop-keyring.gpg
@@ -47,7 +47,7 @@ post_setup_signal_desktop() {
             sudo tee /etc/apt/sources.list.d/signal-xenial.list
 
         # 3. Update your package database and install Signal:
-        sudo apt update -yqq |grep Progress && sudo apt install -yqq signal-desktop 
+        sudo apt update -yqq |grep Progress && sudo apt install --show-progress -yqq signal-desktop 
     else
         step "Signal Desktop is already installed"
     fi
@@ -59,14 +59,14 @@ post_setup_brave() {
         step "Installing Brave Browser"
         if ! _cmd_exists curl; then
             step "Installing Brave Browser dependency - curl"
-            sudo apt-get install -yqq curl
+            sudo apt-get install --show-progress -yqq curl
         fi
         # https://brave.com/linux/
         sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
 
         echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
 
-        sudo apt update -yqq && sudo apt install -yqq brave-browser
+        sudo apt update -yqq && sudo apt install --show-progress -yqq brave-browser
         mkdir -p "$HOME/.config/BraveSoftware/Brave-Browser" &&
             cp "$DOTFILES/misc/brave_local_state.json" "$HOME/.config/BraveSoftware/Brave-Browser/Local State"
     else
@@ -77,7 +77,7 @@ post_setup_brave() {
         step "Installing Brave Browser extensions"
         if ! _cmd_exists jq; then
             step "Installing Brave Browser extensions dependency - jq"
-            sudo apt-get install -yqq jq
+            sudo apt-get install --show-progress -yqq jq
         fi
         local EXTENSIONS_PATH="/opt/brave.com/brave/extensions"
         sudo mkdir -p $EXTENSIONS_PATH && sudo chmod 644 $EXTENSIONS_PATH
@@ -139,7 +139,7 @@ bootstrap_system() {
     echo
     if ! _cmd_exists ufw; then
         step "Installing UFW"
-        sudo apt update -yqq && sudo apt install -yqq ufw
+        sudo apt update -yqq && sudo apt install --show-progress -yqq ufw
     fi
     step "Setting up UFW"
     sudo ufw default deny incoming
@@ -179,15 +179,15 @@ bootstrap_code() {
         # https://code.visualstudio.com/docs/setup/linux
         echo "Type in your sudo password:"
         sudo -v
-        sudo apt install -yqq wget gpg
+        sudo apt install --show-progress -yqq wget gpg
         wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >/tmp/packages.microsoft.gpg
         sudo install -D -o root -g root -m 644 /tmp/packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
         echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
         rm -f /tmp/packages.microsoft.gpg
 
-        sudo apt install -yqq apt-transport-https
+        sudo apt install --show-progress -yqq apt-transport-https
         sudo apt update -yqq
-        sudo apt install -yqq code
+        sudo apt install --show-progress -yqq code
     # MacOS
     elif ! _cmd_exists code && [[ "$(uname)" == "Darwin" ]]; then
         _cmd_exists brew || {
@@ -248,7 +248,7 @@ bootstrap_docker() {
         sudo -v
         sudo apt-get update -yqq
         for pkg in docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove -yq $pkg 2>/dev/null; done
-        sudo apt-get install -yqq ca-certificates curl
+        sudo apt-get install --show-progress -yqq ca-certificates curl
         sudo install -m 0755 -d /etc/apt/keyrings
         DISTRO="$(lsb_release -i | \grep ID: | cut -d: -f2 | tr -d '[:space:]')"
         if [[ "$DISTRO" == *"Ubuntu"* ]]; then
@@ -278,7 +278,7 @@ bootstrap_docker() {
         fi
 
         sudo apt-get update -yqq
-        sudo apt-get install -yqq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        sudo apt-get install --show-progress -yqq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
         sudo groupadd docker &>/dev/null
         sudo usermod -aG docker $USER
         step "Docker is installed"
@@ -311,7 +311,7 @@ bootstrap_golang() {
     if ! _cmd_exists go; then
         if ! _cmd_exists curl; then
             step "Installing Go dependency - curl"
-            sudo apt-get install -yqq curl
+            sudo apt-get install --show-progress -yqq curl
         fi
         step "Installing Golang"
         GO_LATEST_VERSION_ENDPOINT=$(curl -sL https://go.dev/dl/ | \grep 'download.*downloadBox' | \grep -io "/dl/.*$(uname -s).*gz")
@@ -332,8 +332,23 @@ bootstrap_fzf() {
         [[ -d "$HOME/.fzf" ]] || git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
         [[ -f "$HOME/.fzf/bin/fzf" ]] || "$HOME/.fzf/install" --no-zsh --no-bash --no-update-rc --no-completion --no-key-bindings --bin
         sudo cp $HOME/.fzf/bin/fzf /usr/local/bin/
+    elif _cmd_exists fzf && [[ "$(which fzf)" == *"$HOME"* ]]; then
+        step "FZF is already installed in user's home dir - copying to /usr/local/bin/"
+        sudo cp "$HOME/.fzf/bin/fzf" /usr/local/bin/
     else
         step "FZF is already installed"
+    fi
+}
+
+bootstrap_pyenv() {
+    echo
+    if ! _cmd_exists pyenv; then
+        step "Installing pyenv"
+        [[ -d "$HOME/.pyenv" ]] || git clone https://github.com/pyenv/pyenv.git "$HOME/.pyenv"
+        export PATH="$HOME/.pyenv/bin:$PATH"
+        pyenv init -
+    else
+        step "pyenv is already installed"
     fi
 }
 
@@ -355,13 +370,13 @@ bootstrap_eza() {
     echo
     if ! _cmd_exists eza; then
         step "Installing eza dependencies"
-        sudo apt-get install -yqq curl gpg
+        sudo apt-get install --show-progress -yqq curl gpg
         step "Installing eza"
         sudo mkdir -p /etc/apt/keyrings
-        wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
-        echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+        wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --yes --dearmor -o /etc/apt/keyrings/gierens.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list 1>/dev/null
         sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
-        sudo apt update -yqq && sudo apt install -yqq eza
+        sudo apt update -yqq && sudo apt-get install --show-progress -yqq eza
         step "eza installed"
     else
         step "eza is already installed"
@@ -386,7 +401,7 @@ bootstrap_tmux() {
         fi
     fi
     step "Installing Tmux dependencies"
-    sudo apt-get install -yqq libevent-dev ncurses-dev build-essential bison pkg-config
+    sudo apt-get install --show-progress -yqq libevent-dev ncurses-dev build-essential bison pkg-config
     step "Installing Tmux"
     step "  Installing version $TMUX_LATEST_VERSION"
     step "  Downloading official release"
@@ -415,10 +430,10 @@ bootstrap_brew() {
         echo "Type in your sudo password:"
         sudo -v
         step "Installing brew dependencies"
-        sudo apt-get install --show-progress -yq build-essential procps curl file git
+        sudo apt-get install --show-progress -yqq build-essential procps curl file git
         # https://docs.brew.sh/Installation
-        $(which bash) -c "NONINTERACTIVE=1 $(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        step "Brew is probably installed - reload your shell"
+        $(which bash) -c "NONINTERACTIVE=1 $(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) 1>brew.log" 
+        step "Brew is probably installed - reload your shell or check brew.log"
     elif _cmd_exists brew; then
         step "Brew is already installed"
     fi
