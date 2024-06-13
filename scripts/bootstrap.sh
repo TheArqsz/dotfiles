@@ -300,10 +300,11 @@ bootstrap_updog() {
     echo
     if ! _cmd_exists updog; then
         step "Installing updog"
-        pip install --upgrade updog
     else
-        step "Updog is already installed"
+        step "Updog is already installed - updating"
     fi
+    pip install --upgrade -q updog
+    step "Updog installed"
 }
 
 bootstrap_golang() {
