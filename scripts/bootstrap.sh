@@ -19,7 +19,9 @@ Usage: bootstrap -t tool...
 Bootstrap OS and/or tools
 
 Optional arguments:
-    -t, --tool             Bootstrap specific tool (default: none, can be set to "all")
+    -t, --tool             Bootstrap specific tool (default: none, can be set to "all" or "gui")
+        all:    Install all CLI tools
+        gui:    Install additional GUI-based tools (Signal, Brave, Burp Suite Pro)
     -l, --list-tools       List tools to be bootstrapped
     -s, --system           Bootstrap system
     -v, --verbose          Set verbose mode
@@ -434,10 +436,11 @@ done
 
 # List all possible tools to bootstrap
 if [[ "$list_tools" == true ]]; then
-    all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v 'system' | cut -d'_' -f2 | cut -d' ' -f1)
+    all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v 'system\|gui' | cut -d'_' -f2 | cut -d' ' -f1)
     echo $all_tools | sort
     echo '---'
     echo all
+    echo gui
     exit 0
 fi
 
@@ -466,12 +469,11 @@ if [[ -n "${tool_to_bootstrap}" ]]; then
         echo "Bootstrap system with:"
         echo "      bootstrap -s"
         exit 0
-        # exit 0
     elif [[ "$tool_to_bootstrap" != "all" ]] && type bootstrap_"$tool_to_bootstrap" | grep -q "not found"; then
         step "Bootstrap for $tool_to_bootstrap not implemented - exiting"
         exit 1
     elif [[ "$tool_to_bootstrap" == "all" ]]; then
-        all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v 'system' | cut -d'_' -f2 | cut -d' ' -f1)
+        all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v 'system\|gui' | cut -d'_' -f2 | cut -d' ' -f1)
         all_tools_sorted=$(echo $all_tools | sort)
         IFS=$'\n' all_tools_sorted=($(sort <<<"$all_tools"))
         unset IFS
