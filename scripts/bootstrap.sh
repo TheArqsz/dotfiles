@@ -5,8 +5,8 @@
 
 export DOTFILES=${DOTFILES:-"$HOME/.dotfiles"}
 
-_cmd_exists() {
-    command -v "$1" >/dev/null 2>&1
+_cmd_exists() { 
+    alias -s "$1" >/dev/null 2>&1 || command -v "$1" >/dev/null 2>&1
 }
 
 step() {
@@ -445,6 +445,29 @@ bootstrap_brew() {
 
 }
 
+bootstrap_c4p() {
+    echo
+    if ! _cmd_exists c4p && ! [[ -d "$HOME/.c4p" ]]; then
+        _cmd_exists docker || {
+            step "docker is not installed - bootstrapping"
+            bootstrap_docker
+        }
+        step "Installing containers4pentesters project"
+        step "  https://github.com/TheArqsz/containers4pentesters" 
+        [[ -d "$HOME/.c4p" ]] || git clone https://github.com/TheArqsz/containers4pentesters "$HOME/.c4p"
+        sudo ln -s "$HOME/.c4p/c4p.sh" /usr/local/bin/c4p
+
+        step "Containers4Pentesters project is installed"
+        step "  You have to install each tool manually"
+        step "  c4p -t TOOL"
+    elif _cmd_exists c4p; then
+        step "containers4pentesters project is already installed"
+        local C4P_BIN=$(which c4p | awk -F'/' '{for (i=2; i<=NF; i++) printf "/"$i}')
+        $C4P_BIN -l
+    fi
+
+}
+
 tool_to_bootstrap=
 bt_system=false
 list_tools=false
@@ -492,12 +515,14 @@ while [ -n "$1" ]; do
     shift
 done
 
+local EXCLUDED_PACKAGES='system\|gui\|c4p'
 # List all possible tools to bootstrap
 if [[ "$list_tools" == true ]]; then
-    all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v 'system\|gui' | cut -d'_' -f2 | cut -d' ' -f1)
+    all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f2 | cut -d' ' -f1)
     echo $all_tools | sort
     echo '---'
     echo all
+    echo c4p
     echo gui
     exit 0
 fi
@@ -531,7 +556,7 @@ if [[ -n "${tool_to_bootstrap}" ]]; then
         step "Bootstrap for $tool_to_bootstrap not implemented - exiting"
         exit 1
     elif [[ "$tool_to_bootstrap" == "all" ]]; then
-        all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v 'system\|gui' | cut -d'_' -f2 | cut -d' ' -f1)
+        all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f2 | cut -d' ' -f1)
         all_tools_sorted=$(echo $all_tools | sort)
         IFS=$'\n' all_tools_sorted=($(sort <<<"$all_tools"))
         unset IFS

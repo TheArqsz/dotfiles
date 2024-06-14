@@ -87,7 +87,8 @@ autoload -Uz _zinit
 # ---
 if [[ $+commands[eza] -eq 0 ]]; then
   echo "EZA is not installed"
-  echo "Follow instructions at https://github.com/eza-community/eza/blob/main/INSTALL.md and restart your shell"
+  echo "  Follow instructions at https://github.com/eza-community/eza/blob/main/INSTALL.md and restart your shell"
+  echo "  or use bootstrap from .dotfiles"
 fi
 # --- END EZA
 
@@ -282,6 +283,7 @@ if ! (( $+commands[fzf] )) ; then
   echo "FZF was installed at $HOME/.fzf/bin/fzf"
   echo "If you want it to be accessible by every user, copy it to /usr/local/bin/ with:"
   echo "  sudo cp $HOME/.fzf/bin/fzf /usr/local/bin/"
+  echo "  or use bootstrap from .dotfiles"
 fi
 if [[ ! "$PATH" == *$HOME/.fzf/bin* ]]; then
   PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
@@ -289,7 +291,8 @@ fi
 # fd installation is necessary https://github.com/sharkdp/fd?tab=readme-ov-file#installation
 if ! (( $+commands[fdfind] )) && ! (( $+commands[fd] )); then
   echo "fdfind/fd is not installed"
-  echo "Follow instructions at https://github.com/sharkdp/fd?tab=readme-ov-file#installation and restart your shell"
+  echo "  Follow instructions at https://github.com/sharkdp/fd?tab=readme-ov-file#installation and restart your shell"
+  echo "  or use bootstrap from .dotfiles"
 fi
 export FZF_DEFAULT_COMMAND="fd --type=f --color=always --hidden --follow"
 export FZF_DEFAULT_OPTS="--ansi"
@@ -404,4 +407,4 @@ if [ -d "/usr/local/go/bin" ] && ! (( $+commands[go] )); then
   export GOPATH="$HOME/go"
   export PATH="/usr/local/go/bin:$GOPATH/bin:$PATH"
 fi
-# ---
+# ---. /home/user/.c4p_config
