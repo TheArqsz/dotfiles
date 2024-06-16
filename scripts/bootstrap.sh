@@ -22,6 +22,9 @@ Optional arguments:
     -t, --tool             Bootstrap specific tool (default: none, can be set to "all" or "gui")
         all:    Install all CLI tools
         gui:    Install additional GUI-based tools (Signal, Brave, Burp Suite Pro)
+
+        tool1,tool2:    You can specify a few tools separated by a comma
+        
     -l, --list-tools       List tools to be bootstrapped
     -s, --system           Bootstrap system
     -v, --verbose          Set verbose mode
@@ -589,28 +592,32 @@ if [[ $bt_system == true ]]; then
     bootstrap_system
 fi
 
-if [[ -n "${tool_to_bootstrap}" ]]; then
-    if [[ "$tool_to_bootstrap" == "system" ]]; then
-        echo "Bootstrap system with:"
-        echo "      bootstrap -s"
-        exit 0
-    elif [[ "$tool_to_bootstrap" != "all" ]] && type bootstrap_"$tool_to_bootstrap" | grep -q "not found"; then
-        step "Bootstrap for $tool_to_bootstrap not implemented - exiting"
-        exit 1
-    elif [[ "$tool_to_bootstrap" == "all" ]]; then
-        all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f2 | cut -d' ' -f1)
-        all_tools_sorted=$(echo $all_tools | sort)
-        IFS=$'\n' all_tools_sorted=($(sort <<<"$all_tools"))
-        unset IFS
-        for tool in "${all_tools_sorted[@]}"; do
-            bootstrap_"$tool"
-        done
-        # while IFS=$'\n' read -r tool; do
-        #     bootstrap_"$tool"
-        # done <<< "$all_tools_sorted"
-        exit 0
-    else
-        bootstrap_"$tool_to_bootstrap"
-        exit 0
+IFS=',' read -r -A few_tools_to_bootstrap <<< "$tool_to_bootstrap"
+
+for tool_to_bootstrap in "${few_tools_to_bootstrap[@]}"
+do
+    if [[ -n "${tool_to_bootstrap}" ]]; then
+        if [[ "$tool_to_bootstrap" == "system" ]]; then
+            echo "Bootstrap system with:"
+            echo "      bootstrap -s"
+            exit 0
+        elif [[ "$tool_to_bootstrap" != "all" ]] && type bootstrap_"$tool_to_bootstrap" | grep -q "not found"; then
+            step "Bootstrap for $tool_to_bootstrap not implemented - exiting"
+            exit 1
+        elif [[ "$tool_to_bootstrap" == "all" ]]; then
+            all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f2 | cut -d' ' -f1)
+            all_tools_sorted=$(echo $all_tools | sort)
+            IFS=$'\n' all_tools_sorted=($(sort <<<"$all_tools"))
+            unset IFS
+            for tool in "${all_tools_sorted[@]}"; do
+                bootstrap_"$tool"
+            done
+            # while IFS=$'\n' read -r tool; do
+            #     bootstrap_"$tool"
+            # done <<< "$all_tools_sorted"
+            exit 0
+        else
+            bootstrap_"$tool_to_bootstrap"
+        fi
     fi
-fi
+done
