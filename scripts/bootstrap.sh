@@ -177,7 +177,7 @@ bootstrap_code() {
     # Debian-based system
     elif ! _cmd_exists code && [[ -f "/etc/debian_version" ]]; then
         # https://code.visualstudio.com/docs/setup/linux
-        echo "Type in your sudo password:"
+        echo "You may need to type in your sudo password:"
         sudo -v
         sudo apt install --show-progress -yqq wget gpg
         wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >/tmp/packages.microsoft.gpg
@@ -244,7 +244,7 @@ bootstrap_docker() {
             step "apt-get not installed - exiting"
             exit 1
         }
-        echo "Type in your sudo password:"
+        echo "You may need to type in your sudo password:"
         sudo -v
         sudo apt-get update -yqq
         for pkg in docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove -yq $pkg 2>/dev/null; done
@@ -432,7 +432,7 @@ bootstrap_brew() {
             exit 1
         }
         step "Installing brew"
-        echo "Type in your sudo password:"
+        echo "You may need to type in your sudo password:"
         sudo -v
         step "Installing brew dependencies"
         sudo apt-get install --show-progress -yqq build-essential procps curl file git
@@ -466,6 +466,25 @@ bootstrap_c4p() {
         $C4P_BIN -l
     fi
 
+}
+
+bootstrap_obsidian() {
+    echo
+    OBSIDIAN_LATEST_VERSION=$(curl -sL https://github.com/obsidianmd/obsidian-releases/releases | \grep -P 'obsidian-releases/tree/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}"' | awk -F'tree/v' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+    if _cmd_exists obsidian; then
+            step "Obsidian is already installed"
+            return
+    fi
+    if [[ -f "/etc/debian_version" ]]; then
+        step "Installing Obsidian on Debian-based system"
+        step "  Installing version $OBSIDIAN_LATEST_VERSION"
+        step "  Downloading official release"
+        curl -# -SL "https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_LATEST_VERSION}/obsidian_${OBSIDIAN_LATEST_VERSION}_amd64.deb" --output /tmp/obsidian_${TMUX_LATEST_VERSION}.deb && \
+        {
+            sudo dpkg -i /tmp/obsidian_${TMUX_LATEST_VERSION}.deb && \
+            step "Obsidian installed"
+        } || step "Failed to install Obsidian"
+    fi
 }
 
 tool_to_bootstrap=
