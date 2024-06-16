@@ -487,6 +487,29 @@ bootstrap_obsidian() {
     fi
 }
 
+bootstrap_copyq() {
+    echo
+    # Debian-based system
+    if ! _cmd_exists copyq && [[ -f "/etc/debian_version" ]]; then
+        step "Installing CopyQ"
+        echo "You may need to type in your sudo password:"
+        sudo -v
+        sudo apt-get update -yqq
+        sudo apt-get install --show-progress -yqq copyq
+        sh -c 'nohup copyq > /dev/null 2>&1 &'
+        step "CopyQ installed"
+    # MacOS
+    elif ! _cmd_exists copyq && [[ "$(uname)" == "Darwin" ]] && _cmd_exists brew; then
+        step "Installing CopyQ"
+        brew install --cask copyq
+        copyq &
+        step "CopyQ installed"
+    elif _cmd_exists copyq; then
+        step "CopyQ is already installed"
+    fi
+
+}
+
 tool_to_bootstrap=
 bt_system=false
 list_tools=false

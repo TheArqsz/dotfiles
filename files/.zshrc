@@ -340,6 +340,13 @@ kill-dir () {
 }
 zle -N kill-dir
 
+clipboard_history () { 
+  if (( $+commands[copyq] )); then
+    sh -c 'nohup copyq > /dev/null 2>&1 &' && copyq show
+  fi
+}
+zle -N clipboard_history   
+
 bindkey -e    # Emacs keybindings
 # Double bind because...WSL
 bindkey "^A"                        history-substring-search-up                     # Ctrl+Up
@@ -363,8 +370,9 @@ bindkey "\e"t                       tldr-command-line                           
 bindkey '^[^?'                      backward-kill-dir                               # Alt+Backspace/Opt+Backspace
 # bindkey '^[~'                       kill-word                                       # Alt+Delete/Opt+Delete
 # bindkey '^[[3;3~'                   kill-word                                       # Alt+Delete/Opt+Delete
-bindkey '^[~'                       kill-dir                                        # Alt+Delete/Opt+Delete
-bindkey '^[[3;3~'                   kill-dir                                        # Alt+Delete/Opt+Delete
+# bindkey '^[~'                       kill-dir                                        # Alt+Delete/Opt+Delete
+# bindkey '^[[3;3~'                   kill-dir                                        # Alt+Delete/Opt+Delete
+(( $+commands[copyq] )) && bindkey '^X@sv'                   clipboard_history                                       # Meta+V
 
 # --- END Bindings
 
