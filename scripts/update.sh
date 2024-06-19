@@ -15,7 +15,7 @@ info() {
 }
 
 finished() {
-    info "Finished updating $1"
+    info "Finished updating with $1"
     echo
     sleep 1
 }
@@ -31,6 +31,20 @@ update_dotfiles() {
     info "Updating Zinit plugins"
 
     finished update_dotfiles
+}
+
+update_c4p() {
+    if ! [[ -d "$HOME/.c4p" ]]; then
+        info "## Containers4Pentesters don't exists in the default directory $HOME/.c4p - skipping"
+        return
+    fi
+    info "## Updating c4p"
+
+    cd "$HOME/.c4p" || exit
+    git pull
+    cd - > /dev/null 2>&1 || exit
+
+    finished update_c4p
 }
 
 update_zinit() {
@@ -78,6 +92,7 @@ main() {
 
     update_dotfiles "$*"
     update_zinit "$*"
+    update_c4p "$*"
     update_brew "$*"
     update_apt_get "$*"
 

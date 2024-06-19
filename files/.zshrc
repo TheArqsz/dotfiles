@@ -415,4 +415,9 @@ if [ -d "/usr/local/go/bin" ] && ! (( $+commands[go] )); then
   export GOPATH="$HOME/go"
   export PATH="/usr/local/go/bin:$GOPATH/bin:$PATH"
 fi
-# ---. /home/user/.c4p_config
+# --- END Golang
+
+# C4P
+# ---
+[ -d "$HOME/.c4p" ] && . $HOME/.c4p_config
+# --- END C4P
