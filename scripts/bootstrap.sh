@@ -122,6 +122,21 @@ post_setup_burp() {
     fi
 }
 
+post_setup_flameshot() {
+    echo
+    if ! _cmd_exists flameshot && [[ -f "/etc/debian_version" ]]; then
+        step "Installing flameshot"
+        FLAMESHOT_LATEST_VERSION=$(curl -sL https://github.com/flameshot-org/flameshot/releases | \grep -E 'flameshot/tree/v[0-9]+' | \grep -v '.rc' | awk -F'/v' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+        step "  Downloading official release"
+        curl -# -SL "https://github.com/flameshot-org/flameshot/releases/download/v$FLAMESHOT_LATEST_VERSION/flameshot-${FLAMESHOT_LATEST_VERSION}-1.$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')-$(lsb_release -r -s).$(dpkg --print-architecture).deb" --output flameshot.deb
+        sudo dpkg -i flameshot.deb
+    elif [[ ! -f "/etc/debian_version" ]]; then
+        step "Installation of flameshot is not implemented on your current system"
+    else
+        step "flameshot is already installed"
+    fi
+}
+
 bootstrap_gui() {
     if [[ x$DISPLAY == x ]]; then
         step "Bootstrapping for GUI is disabled"
@@ -133,6 +148,7 @@ bootstrap_gui() {
         post_setup_brave
         post_setup_burp
         post_setup_signal_desktop
+        post_setup_flameshot
     else
         step "This is not a Debian-based OS - skipping"
     fi
