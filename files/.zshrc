@@ -370,8 +370,8 @@ bindkey "\e"t                       tldr-command-line                           
 bindkey '^[^?'                      backward-kill-dir                               # Alt+Backspace/Opt+Backspace
 # bindkey '^[~'                       kill-word                                       # Alt+Delete/Opt+Delete
 # bindkey '^[[3;3~'                   kill-word                                       # Alt+Delete/Opt+Delete
-# bindkey '^[~'                       kill-dir                                        # Alt+Delete/Opt+Delete
-# bindkey '^[[3;3~'                   kill-dir                                        # Alt+Delete/Opt+Delete
+bindkey '^[~'                       kill-dir                                        # Alt+Delete/Opt+Delete
+bindkey '^[[3;3~'                   kill-dir                                        # Alt+Delete/Opt+Delete
 (( $+commands[copyq] )) && bindkey '^X@sv'                   clipboard_history                                       # Meta+V
 
 # --- END Bindings
