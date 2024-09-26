@@ -67,18 +67,38 @@ function switch_prompt_hostname {
 }
 
 function generate_password {
-    local length=$1
+    local length=${1:-8}   # Default length is 8 if not provided
     local use_uppercase=false
     local use_numbers=false
     local use_symbols=false
     local char_space="abcdefghijklmnopqrstuvwxyz"
 
+    # Check for help option in any argument
+    for arg in "$@"; do
+        if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
+            echo "Usage: generate_password [LENGTH] [OPTIONS]"
+            echo
+            echo "Generates a random password with a specified length and character options."
+            echo "If LENGTH is not provided, the default length is 8."
+            echo
+            echo "Options:"
+            echo "  -u, --uppercase   Include uppercase letters (A-Z)"
+            echo "  -n, --numbers     Include numbers (0-9)"
+            echo "  -s, --symbols     Include symbols (!@#\$%^&*()_-+=<>?)"
+            echo "  -h, --help        Display this help message"
+            echo
+            echo "Example:"
+            echo "  generate_password 16 -u -n -s"
+            return 0
+        fi
+    done
+
     # Parse optional parameters
     while [[ $# -gt 1 ]]; do
         case "$2" in
-            --uppercase) use_uppercase=true ;;
-            --numbers) use_numbers=true ;;
-            --symbols) use_symbols=true ;;
+            -u|--uppercase) use_uppercase=true ;;
+            -n|--numbers) use_numbers=true ;;
+            -s|--symbols) use_symbols=true ;;
             *) echo "Unknown option: $2"; return 1 ;;
         esac
         shift
@@ -86,23 +106,24 @@ function generate_password {
 
     # Add uppercase letters if requested
     if [[ "$use_uppercase" = true ]]; then
-        char_space="$char_spaceABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        char_space="${char_space}ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     fi
 
     # Add numbers if requested
     if [[ "$use_numbers" = true ]]; then
-        char_space="$char_space0123456789"
+        char_space="${char_space}0123456789"
     fi
 
     # Add symbols if requested
     if [[ "$use_symbols" = true ]]; then
-        char_space="$char_space!@#\$%^&*()_-+=<>?"
+        char_space="${char_space}!@#\$%^&*()_-+=<>?"
     fi
 
     # Generate the random password
     local password=""
-    for _ in $(seq 1 $length); do
-        password+="${char_space:RANDOM%${#char_space}:1}"
+    for ((i=0; i<length; i++)); do
+        local rand_char="${char_space[$((RANDOM % ${#char_space} + 1))]}"
+        password+="$rand_char"
     done
 
     echo "$password"
