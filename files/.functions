@@ -65,3 +65,45 @@ function switch_prompt_hostname {
   # Reload zsh
   [[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
 }
+
+function generate_password {
+    local length=$1
+    local use_uppercase=false
+    local use_numbers=false
+    local use_symbols=false
+    local char_space="abcdefghijklmnopqrstuvwxyz"
+
+    # Parse optional parameters
+    while [[ $# -gt 1 ]]; do
+        case "$2" in
+            --uppercase) use_uppercase=true ;;
+            --numbers) use_numbers=true ;;
+            --symbols) use_symbols=true ;;
+            *) echo "Unknown option: $2"; return 1 ;;
+        esac
+        shift
+    done
+
+    # Add uppercase letters if requested
+    if [[ "$use_uppercase" = true ]]; then
+        char_space="$char_spaceABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    fi
+
+    # Add numbers if requested
+    if [[ "$use_numbers" = true ]]; then
+        char_space="$char_space0123456789"
+    fi
+
+    # Add symbols if requested
+    if [[ "$use_symbols" = true ]]; then
+        char_space="$char_space!@#\$%^&*()_-+=<>?"
+    fi
+
+    # Generate the random password
+    local password=""
+    for _ in $(seq 1 $length); do
+        password+="${char_space:RANDOM%${#char_space}:1}"
+    done
+
+    echo "$password"
+}

@@ -307,6 +307,7 @@ eval "$(fzf --zsh)"
 # Alt+Backspace
 backward-kill-dir () {
     local WORDCHARS=${WORDCHARS/\/}
+    WORDCHARS=${WORDCHARS/-}
     zle backward-kill-word
     zle -f kill  # Ensures that after repeated backward-kill-dir, Ctrl+Y will restore all of them.
 }
