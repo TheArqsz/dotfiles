@@ -1,7 +1,7 @@
 {
   "editor.accessibilitySupport": "off",
   "workbench.colorTheme": "Monokai Dimmed",
-  "terminal.integrated.defaultProfile.linux": "/bin/zsh",
+  "terminal.integrated.defaultProfile.linux": "zsh",
   "redhat.telemetry.enabled": false,
   "pasteImage.insertPattern": "<figure>\n\t<img src=\"${imageFilePath}\"/>\n\t<figcaption><center><i>OPIS</i></center></figcaption>\n</figure>",
   "pasteImage.path": "${currentFileDir}/images",

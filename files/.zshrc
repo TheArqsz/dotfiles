@@ -7,7 +7,7 @@
 # Skipping Ubuntu system-wide compinit
 # https://gist.github.com/ctechols/ca1035271ad134841284?permalink_comment_id=3401477#gistcomment-3401477
 if [[ -f /etc/os-release ]] && [[ "$(awk -F= '/^NAME/{print $2}' /etc/os-release)" == *"Ubuntu"* ]]; then
-    export skip_global_compinit=1
+  export skip_global_compinit=1
 fi
 
 # TERM
@@ -39,7 +39,8 @@ setopt interactive_comments
 
 # Python Pyenv
 # ---
-export DEFAULT_PYENV_PYTHON_VERSION=3.10.7
+export DEFAULT_PYENV_PYTHON_VERSION=3.11.9
+export FALLBACK_PYENV_PYTHON_VERSION=3.10.7
 # Initialization takes huge portion of time when shell is started
 # Temporary workaround: https://github.com/pyenv/pyenv/issues/2918#issuecomment-1977029534
 pyenv() {
@@ -50,25 +51,31 @@ if [[ -d "$HOME/.pyenv" ]]; then
   export PYENV_ROOT="$HOME/.pyenv"
   [[ -d "$PYENV_ROOT/bin" ]] && export PATH="$PYENV_ROOT/bin:$PATH"
   if ! (( $+commands[python] )) || [ "$(which python)" != "$PYENV_ROOT/shims/python" ]; then
-    pyenv install -s $DEFAULT_PYENV_PYTHON_VERSION
-    pyenv global $DEFAULT_PYENV_PYTHON_VERSION
-    exec zsh
+    if pyenv install -l | \grep -q $DEFAULT_PYENV_PYTHON_VERSION 2>/dev/null; then
+      pyenv install -s $DEFAULT_PYENV_PYTHON_VERSION
+      pyenv global $DEFAULT_PYENV_PYTHON_VERSION
+      exec zsh
+    else
+      pyenv install -s $FALLBACK_PYENV_PYTHON_VERSION
+      pyenv global $FALLBACK_PYENV_PYTHON_VERSION
+      exec zsh
+    fi
   fi
 fi
 # --- END Python Pyenv
 
 # Tmux on ssh
 if [[ -n "$PS1" ]] && [[ -z "$TMUX" ]] && [[ -n "$SSH_CONNECTION" ]]; then
-    tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
+  tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
 fi
 
 # Zinit's installer
 # ---
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 if [[ ! -d "${ZINIT_HOME}" ]]; then
-   mkdir -p "$(dirname $ZINIT_HOME)" &&  chmod g-rwX "${ZINIT_HOME}"
-   git clone https://github.com/zdharma-continuum/zinit "${ZINIT_HOME}" || \
-    print -P "The zinit installation has failed."
+  mkdir -p "$(dirname $ZINIT_HOME)" &&  chmod g-rwX "${ZINIT_HOME}"
+  git clone https://github.com/zdharma-continuum/zinit "${ZINIT_HOME}" || \
+  print -P "The zinit installation has failed."
 fi
 
 source "${ZINIT_HOME}/zinit.zsh"
@@ -80,7 +87,8 @@ autoload -Uz _zinit
 # ---
 if [[ $+commands[eza] -eq 0 ]]; then
   echo "EZA is not installed"
-  echo "Follow instructions at https://github.com/eza-community/eza/blob/main/INSTALL.md and restart your shell"
+  echo "  Follow instructions at https://github.com/eza-community/eza/blob/main/INSTALL.md and restart your shell"
+  echo "  or use bootstrap from .dotfiles"
 fi
 # --- END EZA
 
@@ -98,32 +106,32 @@ PS1="$ "
 # ---
 # Must load OMZ library git before others
 zinit lucid for \
-        OMZL::git.zsh \
-        OMZP::git
+OMZL::git.zsh \
+OMZP::git
 
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 zinit for \
-    atload"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
-    blockf \
-    lucid \
-    wait \
-  zsh-hooks/zsh-hooks \
-  zsh-users/zsh-autosuggestions \
-  zsh-users/zsh-completions
+atload"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
+blockf \
+lucid \
+wait \
+zsh-hooks/zsh-hooks \
+zsh-users/zsh-autosuggestions \
+zsh-users/zsh-completions
 
 zinit light zsh-users/zsh-history-substring-search
 [[ "$(uname)" != "Darwin" ]] && zinit light zdharma-continuum/fast-syntax-highlighting # this really slows down prompt typing on MacOS
 
 zinit lucid for \
-    OMZL::clipboard.zsh \
-    OMZP::copyfile \
-    OMZP::systemd \
-    OMZP::pip \
-    Aloxaf/fzf-tab \
-    OMZP::eza \
-    OMZP::tldr \
-    OMZP::command-not-found 
+OMZL::clipboard.zsh \
+OMZP::copyfile \
+OMZP::systemd \
+OMZP::pip \
+Aloxaf/fzf-tab \
+OMZP::eza \
+OMZP::tldr \
+OMZP::command-not-found
 
 # zinit ice as"completion"; zinit snippet https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker
 
@@ -131,10 +139,10 @@ zinit lucid for \
 # https://gist.github.com/ctechols/ca1035271ad134841284
 # autoload -Uz compinit
 # if [[ -f "$HOME/.zcompdump" ]]; then
-#   # Check if the cached .zcompdump file must be regenerated once a day 
+#   # Check if the cached .zcompdump file must be regenerated once a day
 #   # (today as a day in the year vs the time of .zcompdump creation in a day of a year)
 #   if [ $(date +%j) != $(date -r "$HOME/.zcompdump" +%j) ]; then
-#     compinit 
+#     compinit
 #   else
 #     # Use cached
 #     # compinit -C - not working? gonna fix it in the future
@@ -158,7 +166,7 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets root line)
 # Spaceship Theme
 # ---
 # Prompt
-# Adds a newline character before each prompt line 
+# Adds a newline character before each prompt line
 SPACESHIP_PROMPT_ADD_NEWLINE=true
 # Make the prompt span across two lines
 SPACESHIP_PROMPT_SEPARATE_LINE=true
@@ -257,7 +265,7 @@ SPACESHIP_PROMPT_ORDER=(
   char            # Prompt character
 )
 
-# --- END Theme 
+# --- END Theme
 
 # Case insensitive.
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
@@ -275,6 +283,7 @@ if ! (( $+commands[fzf] )) ; then
   echo "FZF was installed at $HOME/.fzf/bin/fzf"
   echo "If you want it to be accessible by every user, copy it to /usr/local/bin/ with:"
   echo "  sudo cp $HOME/.fzf/bin/fzf /usr/local/bin/"
+  echo "  or use bootstrap from .dotfiles"
 fi
 if [[ ! "$PATH" == *$HOME/.fzf/bin* ]]; then
   PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
@@ -282,22 +291,23 @@ fi
 # fd installation is necessary https://github.com/sharkdp/fd?tab=readme-ov-file#installation
 if ! (( $+commands[fdfind] )) && ! (( $+commands[fd] )); then
   echo "fdfind/fd is not installed"
-  echo "Follow instructions at https://github.com/sharkdp/fd?tab=readme-ov-file#installation and restart your shell"
+  echo "  Follow instructions at https://github.com/sharkdp/fd?tab=readme-ov-file#installation and restart your shell"
+  echo "  or use bootstrap from .dotfiles"
 fi
 export FZF_DEFAULT_COMMAND="fd --type=f --color=always --hidden --follow"
 export FZF_DEFAULT_OPTS="--ansi"
 zstyle ':completion:*' menu yes
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':fzf-tab:complete:(cd|ls|lsd|exa|eza|bat|cat|emacs|nano|vi|vim):*' \
-       fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -1 --color=always $realpath'
+fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -1 --color=always $realpath'
 zstyle ':fzf-tab:complete:(-command-|-parameter-|-brace-parameter-|export|unset|expand):*' \
-	   fzf-preview 'echo ${(P)word}'
+fzf-preview 'echo ${(P)word}'
 zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup # https://github.com/Aloxaf/fzf-tab?tab=readme-ov-file#tmux
 # Preivew `systemctl` command
 # https://github.com/seagle0128/dotfiles/blob/master/.zshrc
 zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
 zstyle ':fzf-tab:*' switch-group '<' '>'
-eval "$(fzf --zsh)" 
+eval "$(fzf --zsh)"
 # --- END fzf
 
 # Bindings
@@ -314,22 +324,29 @@ backward-kill-dir () {
 zle -N backward-kill-dir
 # Alt+Left
 backward-word-dir () {
-    local WORDCHARS=${WORDCHARS/\/}
-    zle backward-word
+  local WORDCHARS=${WORDCHARS/\/}
+  zle backward-word
 }
 zle -N backward-word-dir
 # Alt+Right
 forward-word-dir () {
-    local WORDCHARS=${WORDCHARS/\/}
-    zle forward-word
+  local WORDCHARS=${WORDCHARS/\/}
+  zle forward-word
 }
 zle -N forward-word-dir
 # Alt+Delete
 kill-dir () {
-    local WORDCHARS=${WORDCHARS/\/}
-    zle kill-word
+  local WORDCHARS=${WORDCHARS/\/}
+  zle kill-word
 }
 zle -N kill-dir
+
+clipboard_history () { 
+  if (( $+commands[copyq] )); then
+    sh -c 'nohup copyq > /dev/null 2>&1 &' && copyq show
+  fi
+}
+zle -N clipboard_history   
 
 bindkey -e    # Emacs keybindings
 # Double bind because...WSL
@@ -356,6 +373,7 @@ bindkey '^[^?'                      backward-kill-dir                           
 # bindkey '^[[3;3~'                   kill-word                                       # Alt+Delete/Opt+Delete
 bindkey '^[~'                       kill-dir                                        # Alt+Delete/Opt+Delete
 bindkey '^[[3;3~'                   kill-dir                                        # Alt+Delete/Opt+Delete
+(( $+commands[copyq] )) && bindkey '^X@sv'                   clipboard_history                                       # Meta+V
 
 # --- END Bindings
 
@@ -375,13 +393,32 @@ setopt 	extended_history	# Record timestamp of command in HISTFILE
 # --- END History
 
 # Other ZSH options
-setopt	autocd			# Use the name of a directory instead of "cd name" 
+setopt	autocd			# Use the name of a directory instead of "cd name"
 
 # Brew specific
 # ---
+if [ -d "/home/linuxbrew/.linuxbrew/bin/" ] && ! (( $+commands[brew] )); then
+  export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+fi
 if (( $+commands[brew] )); then
-    # Tell homebrew to autoupdate just once a week
-    export HOMEBREW_AUTO_UPDATE_SECS=604800
-    fpath+=("$(brew --prefix)/share/zsh/site-functions")       
+  # Tell homebrew to autoupdate just once a week
+  export HOMEBREW_AUTO_UPDATE_SECS=604800
+  export HOMEBREW_NO_ANALYTICS=true
+  export HOMEBREW_NO_EMOJI=true
+  fpath+=("$(brew --prefix)/share/zsh/site-functions")
 fi
 # --- END Brew
+
+# Golang
+# ---
+if [ -d "/usr/local/go/bin" ] && ! (( $+commands[go] )); then
+  mkdir -p "$HOME/go" && \
+  export GOPATH="$HOME/go"
+  export PATH="/usr/local/go/bin:$GOPATH/bin:$PATH"
+fi
+# --- END Golang
+
+# C4P
+# ---
+[ -d "$HOME/.c4p" ] && . $HOME/.c4p_config
+# --- END C4P
