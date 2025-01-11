@@ -128,3 +128,166 @@ function generate_password {
 
     echo "$password"
 }
+
+function mount_cryptomator {
+    local VAULT_PATH="${1:-/mnt/vault}" 
+    local TARGET_PATH="${2:-/mnt/crypto}" 
+
+    # Check for help option in any argument
+    for arg in "$@"; do
+        if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
+            echo "Usage: mount_cryptomator [VAULT_PATH] [TARGET_PATH]"
+            echo
+            echo "Mounts a Cryptomator vault to a specified target directory."
+            echo
+            echo "Arguments:"
+            echo "  VAULT_PATH        Path to the Cryptomator vault directory (e.g., /mnt/vault)"
+            echo "  TARGET_PATH       Local path where the decrypted vault will be mounted (e.g., /mnt/crypto)"
+            echo
+            echo "Options:"
+            echo "  -h, --help        Display this help message"
+            echo
+            echo "Example:"
+            echo "  mount_cryptomator /mnt/vault /mnt/crypto"
+            echo
+            return 0
+        fi
+    done
+
+    # Validate inputs
+    if [[ -z "$VAULT_PATH" || -z "$TARGET_PATH" ]]; then
+        echo "Error: Both VAULT_PATH and TARGET_PATH are required."
+        echo "  Run 'mount_cryptomator --help' for usage information."
+        return 1
+    fi
+
+    # Parse optional parameters
+    while [[ $# -gt 2 ]]; do
+        case "$3" in
+            *) echo "Unknown option: $2"; return 1 ;;
+        esac
+        shift
+    done
+
+    if alias -s "cryptomator-cli" >/dev/null 2>&1 || command -v "cryptomator-cli" >/dev/null 2>&1; then
+        echo
+        # Prepare the target mount directory
+        echo "## Preparing the target directory for mounting..."
+        sudo mkdir -p "$TARGET_PATH" && sudo chown "$(id -u):$(id -g)" "$TARGET_PATH"
+        if [[ $? -ne 0 ]]; then
+            echo "Error: Failed to prepare the target directory. Check permissions or path validity."
+            return 1
+        fi
+
+        echo "## Unlocking the vault..."
+        echo "  You may need to provide your vault's password"
+        cryptomator-cli unlock \
+          --password:stdin \
+          --mounter=org.cryptomator.frontend.fuse.mount.LinuxFuseMountProvider \
+          --mountPoint="$TARGET_PATH" \
+          "$VAULT_PATH"
+    else
+        echo "Cryptomator's CLI is not installed"
+        echo "Install it using:"
+        echo "  bootstrap -t cryptomator-cli"
+        exit 1
+    fi
+}
+
+function mount_remote_vault {
+    local REMOTE_PATH="${1:-//localhost/share}" 
+    local TARGET_PATH="${2:-/mnt/smbshare}" 
+    local smb_username="user"
+    local vault_dir="Data"
+    local cryptomator_mount="/mnt/crypto"
+
+    # Check for help option in any argument
+    for arg in "$@"; do
+        if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
+            echo "Usage: mount_remote_vault [REMOTE_PATH] [TARGET_PATH] [OPTIONS]"
+            echo
+            echo "Mounts a remote Cryptomator vault hosted in an SMB share."
+            echo
+            echo "Arguments:"
+            echo "  REMOTE_PATH       Path to the remote SMB share (e.g., //localhost/share)"
+            echo "  TARGET_PATH       Local mount point for the SMB share (e.g., /mnt/smbshare)"
+            echo
+            echo "Options:"
+            echo "  -u, --username    SMB username for authentication (default: 'user')"
+            echo "  -v, --vault_dir   Directory name of the vault inside the SMB share (default: 'Data')"
+            echo "  -c, --cryptomator_mount"
+            echo "                    Local path to mount the decrypted Cryptomator vault (default: '/mnt/crypto')"
+            echo "  -h, --help        Display this help message and exit"
+            echo
+            echo "Example:"
+            echo "  mount_remote_vault //localhost/share /mnt/crypto -u myuser -v MyVault -c /mnt/decrypted"
+            echo
+            return 0
+        fi
+    done
+
+    # Parse optional parameters
+    while [[ $# -gt 2 ]]; do
+        case "$3" in
+            -u|--username) shift; smb_username=$3;;
+            -v|--vault_dir) shift; vault_dir=$3;;
+            -c|--cryptomator_mount) shift; cryptomator_mount=$3;;
+            *) echo "Unknown option: $3"; return 1 ;;
+        esac
+        shift
+    done
+
+    if alias -s "cryptomator-cli" >/dev/null 2>&1 || command -v "cryptomator-cli" >/dev/null 2>&1; then
+        echo
+        echo "This will be run in the foreground."
+        while true; do
+            echo -n "  Do you want to continue? (y/n): "
+            read response
+            case "$response" in
+                [Yy]* ) break ;;
+                [Nn]* ) echo "Exiting."; return 1 ;;
+                * ) echo "  Invalid input. Please enter y/yes or n/no." ;;
+            esac
+        done
+
+        echo
+        echo "## Mounting the remote Cryptomator's Vault hosted in the SMB Share"
+        echo "  You may need to type in your sudo password"
+        sudo -v
+
+        # Prepare the target directory
+        sudo mkdir -p "$TARGET_PATH" && \
+        sudo chown $(id -u):$(id -g) "$TARGET_PATH" 
+
+        # Install required dependencies
+        echo "## Installing CIFS dependencies..."
+        sudo apt-get update -yqq && \
+        sudo apt-get install --show-progress -yqq cifs-utils
+
+        # Mount the SMB share
+        echo "## Mounting the SMB share from $REMOTE_PATH..."
+        sudo umount "$TARGET_PATH" 2>/dev/null
+
+        if sudo mount -o username="$smb_username",uid="$(id -u)",rw -t cifs "$REMOTE_PATH" "$TARGET_PATH"; then
+            echo "  Mounted SMB share successfully!"
+            echo "## Passing the arguments to the cryptomator handler..."
+            if command -v mount_cryptomator >/dev/null 2>&1; then
+                mount_cryptomator "$TARGET_PATH/$vault_dir" "$cryptomator_mount"
+            else
+                echo "Error: mount_cryptomator command not found."
+                return 1
+            fi
+        else
+            echo "Error: Failed to mount the SMB share. Please check your inputs and try again."
+            return 1
+        fi
+
+        # sudo mount -o username=$smb_username,uid=$(id -u),rw -t cifs "$REMOTE_PATH" "$TARGET_PATH" && \
+        # mount_cryptomator "$TARGET_PATH/$vault_dir" "$cryptomator_mount"        
+    else
+        echo "Cryptomator's CLI is not installed"
+        echo "Install it using:"
+        echo "  bootstrap -t cryptomator-cli"
+        exit 1
+    fi
+}

@@ -529,6 +529,39 @@ bootstrap_copyq() {
 
 }
 
+bootstrap_cryptomator-cli() {
+    echo
+    CRYPTO_CLI_LATEST_VERSION=$(curl -sL https://github.com/cryptomator/cli/releases | \grep -P 'cryptomator/cli/tree/[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}"' | awk -F'tree/' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+    # Debian-based system
+    if [[ -f "/etc/debian_version" ]]; then
+        step "Installing Cryptomator's CLI on Debian-based system"
+        step "You may need to type in your sudo password:"
+        sudo -v
+        sudo apt-get update -yqq
+        sudo apt-get install --show-progress -yqq fuse3 unzip
+        step "  Installing version $CRYPTO_CLI_LATEST_VERSION"
+        step "  Downloading official release"
+        curl -# -SL "https://github.com/cryptomator/cli/releases/download/${CRYPTO_CLI_LATEST_VERSION}/cryptomator-cli-${CRYPTO_CLI_LATEST_VERSION}-linux-x64.zip" --output /tmp/cryptomator-cli-${CRYPTO_CLI_LATEST_VERSION}-linux-x64.zip && \
+        {
+            unzip -o -d /tmp/ /tmp/cryptomator-cli-${CRYPTO_CLI_LATEST_VERSION}-linux-x64.zip && \
+            rm /tmp/cryptomator-cli-${CRYPTO_CLI_LATEST_VERSION}-linux-x64.zip && \
+            sudo rm -rf /opt/cryptomator-cli 2>/dev/null && \
+            sudo mv -f /tmp/cryptomator-cli /opt/ && \
+            chown $(id -u):$(id -g) /opt/cryptomator-cli && \
+            sudo ln -f -s /opt/cryptomator-cli/bin/cryptomator-cli /usr/local/bin/cryptomator-cli && \
+            [ -f /usr/local/bin/cryptomator-cli ] && \
+            step "Cryptomator's CLI installed"
+        } || step "Failed to install Cryptomator's CLI"
+    # MacOS
+    elif ! _cmd_exists copyq && [[ "$(uname)" == "Darwin" ]] && _cmd_exists brew; then
+        step "Not implemented"
+        return
+    elif _cmd_exists cryptomator-cli; then
+        step "cryptomator-cli is already installed"
+    fi
+
+}
+
 tool_to_bootstrap=
 bt_system=false
 list_tools=false
