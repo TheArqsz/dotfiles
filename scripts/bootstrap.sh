@@ -317,7 +317,10 @@ bootstrap_docker() {
 
 bootstrap_updog() {
     echo
-    if ! _cmd_exists updog; then
+    if ! _cmd_exists pip; then
+        step "Cannot install updog - pip not found"
+        return 1
+    elif ! _cmd_exists updog; then
         step "Installing updog"
     else
         step "Updog is already installed - updating"
@@ -384,7 +387,8 @@ bootstrap_fdfind() {
         step "  Downloading official release"
         curl -# -SL "https://github.com/sharkdp/fd/releases/download/v$FD_LATEST_VERSION/fd-musl_${FD_LATEST_VERSION}_$(dpkg --print-architecture).deb" --output fd.deb
         sudo dpkg -i fd.deb && \
-        sudo ln -s /usr/bin/fd /usr/bin/fdfind
+        rm fd.deb && \
+        sudo ln -fs /usr/bin/fd /usr/bin/fdfind
     else
         step "fdfind is already installed"
     fi
