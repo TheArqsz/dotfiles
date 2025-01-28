@@ -11,6 +11,9 @@ if (( $+commands[eza] )); then
     alias tree='ls --tree'
 fi
 
+# nano -> micro
+(( $+commands[micro] )) && alias nano=micro
+
 # fd
 (( $+commands[fd] )) && alias find=fd
 if (( $+commands[fdfind] )); then

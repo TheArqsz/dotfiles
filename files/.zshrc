@@ -20,7 +20,7 @@ export CLICOLOR=1
 export CLICOLOR_FORCE=1
 
 # Custom PATH
-export PATH="/home/user/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/sbin:$HOME/go/bin:$PATH"
+export PATH="$PATH:/home/user/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/sbin:$HOME/go/bin"
 
 # Include alias file (if present) containing aliases for ssh, etc.
 if [ -f ~/.aliases ]
@@ -50,7 +50,7 @@ pyenv() {
 if [[ -d "$HOME/.pyenv" ]]; then
   export PYENV_ROOT="$HOME/.pyenv"
   [[ -d "$PYENV_ROOT/bin" ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-  if ! (( $+commands[python] )) || [ "$(which python)" != "$PYENV_ROOT/shims/python" ]; then
+  if ! (( $+commands[python] )) || [ "$(command -v python)" != "$PYENV_ROOT/shims/python" ]; then
     if pyenv install -l | \grep -q $DEFAULT_PYENV_PYTHON_VERSION 2>/dev/null; then
       pyenv install -s $DEFAULT_PYENV_PYTHON_VERSION
       pyenv global $DEFAULT_PYENV_PYTHON_VERSION
@@ -73,7 +73,7 @@ fi
 # ---
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 if [[ ! -d "${ZINIT_HOME}" ]]; then
-  mkdir -p "$(dirname $ZINIT_HOME)" &&  chmod g-rwX "${ZINIT_HOME}"
+  mkdir -p "$(dirname "$ZINIT_HOME")" &&  chmod g-rwX "${ZINIT_HOME}"
   git clone https://github.com/zdharma-continuum/zinit "${ZINIT_HOME}" || \
   print -P "The zinit installation has failed."
 fi
@@ -286,7 +286,9 @@ if ! (( $+commands[fzf] )) ; then
   echo "  or use bootstrap from .dotfiles"
 fi
 if [[ ! "$PATH" == *$HOME/.fzf/bin* ]]; then
-  PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
+  if [[ ":$PATH:" != *":$HOME/.fzf/bin:"* ]]; then
+    PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
+  fi
 fi
 # fd installation is necessary https://github.com/sharkdp/fd?tab=readme-ov-file#installation
 if ! (( $+commands[fdfind] )) && ! (( $+commands[fd] )); then

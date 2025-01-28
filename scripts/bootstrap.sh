@@ -502,9 +502,9 @@ bootstrap_obsidian() {
         step "Installing Obsidian on Debian-based system"
         step "  Installing version $OBSIDIAN_LATEST_VERSION"
         step "  Downloading official release"
-        curl -# -SL "https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_LATEST_VERSION}/obsidian_${OBSIDIAN_LATEST_VERSION}_amd64.deb" --output /tmp/obsidian_${TMUX_LATEST_VERSION}.deb && \
+        curl -# -SL "https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_LATEST_VERSION}/obsidian_${OBSIDIAN_LATEST_VERSION}_amd64.deb" --output /tmp/obsidian_${OBSIDIAN_LATEST_VERSION}.deb && \
         {
-            sudo dpkg -i /tmp/obsidian_${TMUX_LATEST_VERSION}.deb && \
+            sudo dpkg -i /tmp/obsidian_${OBSIDIAN_LATEST_VERSION}.deb && \
             step "Obsidian installed"
         } || step "Failed to install Obsidian"
     fi
@@ -564,6 +564,54 @@ bootstrap_cryptomator-cli() {
         step "cryptomator-cli is already installed"
     fi
 
+}
+
+bootstrap_micro() {
+    echo
+    MICRO_LATEST_VERSION=$(curl -sL https://github.com/zyedidia/micro/releases | \grep -E 'micro/tree/' | awk -F'tree/v' '{print $2}' | awk -F'" ' '{print $1}' | awk 'NF' | head -n1)
+    if _cmd_exists micro; then
+        if [[ "Version: $MICRO_LATEST_VERSION" == "$(micro -version)" ]]; then
+            step "Micro is already installed and updated to the latest version"
+            return
+        else
+            step "Micro is already installed - updating"
+            sudo apt-get remove -yqq micro 2>/dev/null
+            # If still exists
+            if _cmd_exists micro; then
+                step "Force removing old micro (was not installed with apt)"
+                sudo rm -f $(which micro) 2>/dev/null
+            fi
+        fi
+    fi
+    case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
+        "linux")
+        case "$machine" in
+            "arm64"* | "aarch64"* ) platform='linux-arm64' ;;
+            "arm"* | "aarch"*) platform='linux-arm' ;;
+            *"86") platform='linux32' ;;
+            *"64") platform='linux64' ;;
+        esac
+        ;;
+        "darwin") platform='osx' ;;
+    esac
+    step "Installing micro"
+    step "  Installing version $MICRO_LATEST_VERSION"
+    step "  Downloading official release"
+    curl -# -SL "https://github.com/zyedidia/micro/releases/download/v${MICRO_LATEST_VERSION}/micro-${MICRO_LATEST_VERSION}-${platform}-static.tar.gz" --output /tmp/micro_${MICRO_LATEST_VERSION}.tar.gz 
+    tar -C /tmp/ -zxf /tmp/micro_${MICRO_LATEST_VERSION}.tar.gz 
+    cd /tmp/micro-$MICRO_LATEST_VERSION/
+    sudo mv -f micro /usr/local/bin/ 
+    sudo rm -rf /tmp/micro-$MICRO_LATEST_VERSION/
+    cd -
+    if [[ "$(uname -r)" == *"microsoft"* ]]; then
+        step "Updating xclip for WSL"
+        sudo ln -s "$DOTFILES/misc/wsl-xclip.sh" /usr/local/bin/xclip
+        sudo ln -s "$DOTFILES/misc/wsl-xclip.sh" /usr/local/bin/xsel
+    fi
+    mkdir -p "$HOME/.config/micro"
+    ln -fs "$DOTFILES/misc/micro/settings.json" "$HOME/.config/micro/settings.json"
+    ln -fs "$DOTFILES/misc/micro/bindings.json" "$HOME/.config/micro/bindings.json"
+    step "Micro installed"
 }
 
 tool_to_bootstrap=
