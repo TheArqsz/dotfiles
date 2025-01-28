@@ -570,7 +570,7 @@ bootstrap_micro() {
     echo
     MICRO_LATEST_VERSION=$(curl -sL https://github.com/zyedidia/micro/releases | \grep -E 'micro/tree/' | awk -F'tree/v' '{print $2}' | awk -F'" ' '{print $1}' | awk 'NF' | head -n1)
     if _cmd_exists micro; then
-        if [[ "Version: $MICRO_LATEST_VERSION" == "$(micro -version)" ]]; then
+        if micro -version | grep -q "Version: $MICRO_LATEST_VERSION"; then
             step "Micro is already installed and updated to the latest version"
             return
         else
@@ -583,6 +583,8 @@ bootstrap_micro() {
             fi
         fi
     fi
+    platform=''
+    machine=$(uname -m)
     case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
         "linux")
         case "$machine" in
@@ -605,8 +607,10 @@ bootstrap_micro() {
     cd -
     if [[ "$(uname -r)" == *"microsoft"* ]]; then
         step "Updating xclip for WSL"
-        sudo ln -s "$DOTFILES/misc/wsl-xclip.sh" /usr/local/bin/xclip
-        sudo ln -s "$DOTFILES/misc/wsl-xclip.sh" /usr/local/bin/xsel
+        sudo ln -fs "$DOTFILES/misc/micro/wsl-xclip.sh" /usr/bin/xclip && sudo chmod +x /usr/bin/xclip
+        sudo ln -fs "$DOTFILES/misc/micro/wsl-xclip.sh" /usr/bin/xsel && sudo chmod +x /usr/bin/xsel
+    elif [[ -f "/etc/debian_version" ]]; then
+        sudo apt-get install --show-progress -yqq xclip xsel
     fi
     mkdir -p "$HOME/.config/micro"
     ln -fs "$DOTFILES/misc/micro/settings.json" "$HOME/.config/micro/settings.json"
