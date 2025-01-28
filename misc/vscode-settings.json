@@ -10,8 +10,21 @@
   "editor.wordWrap": "on",
   "telemetry.telemetryLevel": "off",
   "window.zoomLevel": 1,
+  "editor.minimap.enabled": true,
   "editor.tabSize": 4,
+  "editor.smoothScrolling": true,
+  "editor.tabCompletion": "on",
   "editor.insertSpaces": true,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 5000,
+  "editor.formatOnSave": true,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.errorLens.enabled": true,
+  "gitlens.hovers.enabled": true,
+  "gitlens.currentLine.enabled": true,
+  "gitlens.codeLens.enabled": true,
+  "gitlens.statusBar.enabled": true,
   "[python]": {
     "editor.formatOnType": true,
     "editor.defaultFormatter": "ms-python.black-formatter"
@@ -20,13 +33,13 @@
     "editor.defaultFormatter": "redhat.vscode-yaml"
   },
   "[javascript]": {
-      "editor.tabSize": 2
+    "editor.tabSize": 2
   },
   "[json]": {
-      "editor.tabSize": 2
+    "editor.tabSize": 2
   },
   "[nginx]": {
-      "editor.tabSize": 2,
-      "editor.defaultFormatter": "ahmadalli.vscode-nginx-conf"
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "ahmadalli.vscode-nginx-conf"
   }
 }

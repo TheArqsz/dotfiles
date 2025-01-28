@@ -21,16 +21,28 @@ Inspired by:
 	* [Additional information on tools](#additional-information-on-tools)
 * [License](#license)
 
-##  Installation
+## Installation
 
+Make sure you have `zsh` installed and set it as your default shell:
+
+```bash
+# Install zsh (if not already installed)
+sudo apt-get install zsh
+
+# Change the default shell to zsh
+chsh -s $(which zsh)
 ```
-# Clone dotfiles repo
+
+To install the dotfiles, follow these steps:
+
+```bash
+# Clone the dotfiles repository
 git clone https://github.com/TheArqsz/dotfiles.git $HOME/.dotfiles
 
-# Go to the dotfiles directory
+# Navigate to the dotfiles directory
 cd $HOME/.dotfiles
 
-# Install dotfiles
+# Run the installation script
 ./install
 ```
 
@@ -169,9 +181,27 @@ For my zsh to be as noninteractive to be set up as possible I made it to install
 - `btsp`=`zsh $DOTFILES/scripts/bootstrap.sh`
 - `bootstrap.sh`=`zsh $DOTFILES/scripts/bootstrap.sh`
 
-##  Bootstraping
+### Additional Functions
 
-If you want to automate the installation of a few tools, I got you covered. I implemented some functions that can do that for you. It can be found at the `bootstrap` or `bootstrap.sh` or `btsp` aliases:
+This repository includes several useful functions to enhance the workflow. Below is a high-level overview of the available functions:
+
+- **dockenter**: Enter a running Docker container using its ID or name.
+
+- **extend_path**: Extend the $PATH environment variable without adding duplicates.
+
+- **switch_prompt_ip**: Toggle the display of the IP address in the Spaceship prompt.
+
+- **switch_prompt_hostname**: Toggle the display of the hostname in the Spaceship prompt.
+
+- **generate_password**: Generate a random password with customizable length and character options.
+
+- **mount_cryptomator**: Mount a Cryptomator vault to a specified target directory.
+
+- **mount_remote_vault**: Mount a remote Cryptomator vault hosted in an SMB share.
+
+## Bootstraping
+
+To automate the installation of various tools, several functions have been implemented. These can be accessed using the `bootstrap`, `bootstrap.sh`, or `btsp` aliases:
 
 ```zsh
 $ bootstrap -h
@@ -183,7 +213,7 @@ Optional arguments:
         all:    Install all CLI tools
         gui:    Install additional GUI-based tools (Signal, Brave, Burp Suite Pro)
 
-        tool1,tool2:    You can specify a few tools separated by a comma
+        tool1,tool2:    Multiple tools can be specified, separated by a comma
 
     -l, --list-tools       List tools to be bootstrapped
     -s, --system           Bootstrap system
@@ -193,24 +223,28 @@ Optional arguments:
     --list-default-ext     List default VSCode extensions
 ```
 
-Current list of basic tools:
+Current list of tools:
 
 ```zsh
-brew
-code
-copyq
+brave
+burp
+flameshot
+signal_desktop
 docker
-eza
-fdfind
-fzf
-golang
-obsidian
-pyenv
-tmux
 updog
+golang
+fzf
+pyenv
+fdfind
+eza
+tmux
+brew
+obsidian
+copyq
+cryptomator-cli
 ```
 
-Additionaly, I prepared 3 additional `categories`:
+Additionally, three categories have been prepared:
 
 ```zsh
 all
@@ -218,31 +252,31 @@ c4p
 gui
 ```
 
-Each of the given tools or categories may be installed with:
+Each of the given tools or categories can be installed with:
 
 ```zsh
-$ bootstrap -l copyq
+$ bootstrap -t copyq
 ```
 
 or 
 
 ```zsh
-$ bootstrap -l copyq,docker,eza
+$ bootstrap -t copyq,docker,eza
 ```
 
-###  Categories
+### Categories
 
-- `all` - it will install all the basic tools listed above
-- `c4p` - it will install the [c4p](https://github.com/TheArqsz/containers4pentesters) project
-- `gui` - it will install GUI tools, such as:
+- `all` - Installs all the basic tools listed above
+- `c4p` - Installs the [c4p](https://github.com/TheArqsz/containers4pentesters) project
+- `gui` - Installs GUI tools, such as:
     - `brave`
     - `burp suite`
     - `signal`
     - `flameshot`
 
-###  Additional information on tools
+### Additional information on tools
 
-- VSCode is by default installed with given extensions:
+- VSCode is by default installed with the following extensions:
 
 ```bash
 ms-python.black-formatter          # Black Formatter
@@ -262,7 +296,7 @@ Gruntfuggly.todo-tree              # Todo Tree
 redhat.vscode-yaml                 # YAML
 ```
 
-- For VSCode I also provide the [settings.json](./misc/vscode-settings.json) file that I find the most useful and universal
+- For VSCode, a [settings.json](./misc/vscode-settings.json) file is provided, which is considered most useful and universal.
 
 - Brave Browser is by default installed with extensions listed in [brave_extensions.json](./misc/brave_extensions.json):
 
