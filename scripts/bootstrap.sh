@@ -5,36 +5,42 @@
 
 export DOTFILES=${DOTFILES:-"$HOME/.dotfiles"}
 
+# Check if a command exists
 _cmd_exists() { 
     alias -s "$1" >/dev/null 2>&1 || command -v "$1" >/dev/null 2>&1
 }
 
+# Print a step message
 step() {
     echo -e "## ${*}"
 }
 
+# Display help message
 show_help() {
     cat <<%
-Usage: bootstrap -t tool...
+Usage: bootstrap [options]
+
 Bootstrap OS and/or tools
 
-Optional arguments:
+Options:
     -t, --tool             Bootstrap specific tool (default: none, can be set to "all" or "gui")
-        all:    Install all CLI tools
-        gui:    Install additional GUI-based tools (Signal, Brave, Burp Suite Pro)
+                           all: Install all CLI tools
+                           gui: Install additional GUI-based tools (e.g. Signal, Brave, Burp Suite Pro)
+                           tool1,tool2: Specify multiple tools separated by a comma
+    --gui-tool             Install specific GUI tool
 
-        tool1,tool2:    You can specify a few tools separated by a comma
-        
     -l, --list-tools       List tools to be bootstrapped
     -s, --system           Bootstrap system
-    -v, --verbose          Set verbose mode
-
+    -v, --verbose          Enable verbose mode
     --code-extensions      Additional VSCode extensions to install
     --list-default-ext     List default VSCode extensions
+
+    -h, --help             Show this help message and exit
 %
 }
 
-post_setup_signal_desktop() {
+# Setup GUI tools
+gui_setup_signal_desktop() {
     echo
     if ! _cmd_exists signal-desktop; then
         step "Installing Signal Desktop"
@@ -56,7 +62,7 @@ post_setup_signal_desktop() {
     fi
 }
 
-post_setup_brave() {
+gui_setup_brave() {
     echo
     if ! _cmd_exists brave-browser; then
         step "Installing Brave Browser"
@@ -107,7 +113,7 @@ post_setup_brave() {
     step "      brave://extensions/"
 }
 
-post_setup_burp() {
+gui_setup_burp() {
     echo
     if ! _cmd_exists burpsuite && ! _cmd_exists BurpSuitePro; then
         step "Installing Burp Suite"
@@ -122,7 +128,7 @@ post_setup_burp() {
     fi
 }
 
-post_setup_flameshot() {
+gui_setup_flameshot() {
     echo
     if ! _cmd_exists flameshot && [[ -f "/etc/debian_version" ]]; then
         step "Installing flameshot"
@@ -137,6 +143,48 @@ post_setup_flameshot() {
     fi
 }
 
+gui_setup_obsidian() {
+    echo
+    OBSIDIAN_LATEST_VERSION=$(curl -sL https://github.com/obsidianmd/obsidian-releases/releases | \grep -P 'obsidian-releases/tree/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}"' | awk -F'tree/v' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+    if _cmd_exists obsidian; then
+            step "Obsidian is already installed"
+            return
+    fi
+    if [[ -f "/etc/debian_version" ]]; then
+        step "Installing Obsidian on Debian-based system"
+        step "  Installing version $OBSIDIAN_LATEST_VERSION"
+        step "  Downloading official release"
+        curl -# -SL "https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_LATEST_VERSION}/obsidian_${OBSIDIAN_LATEST_VERSION}_amd64.deb" --output /tmp/obsidian_${OBSIDIAN_LATEST_VERSION}.deb && \
+        {
+            sudo dpkg -i /tmp/obsidian_${OBSIDIAN_LATEST_VERSION}.deb && \
+            step "Obsidian installed"
+        } || step "Failed to install Obsidian"
+    fi
+}
+
+gui_setup_copyq() {
+    echo
+    # Debian-based system
+    if ! _cmd_exists copyq && [[ -f "/etc/debian_version" ]]; then
+        step "Installing CopyQ"
+        echo "You may need to type in your sudo password:"
+        sudo -v
+        sudo apt-get update -yqq
+        sudo apt-get install --show-progress -yqq copyq
+        sh -c 'nohup copyq > /dev/null 2>&1 &'
+        step "CopyQ installed"
+    # MacOS
+    elif ! _cmd_exists copyq && [[ "$(uname)" == "Darwin" ]] && _cmd_exists brew; then
+        step "Installing CopyQ"
+        brew install --cask copyq
+        copyq &
+        step "CopyQ installed"
+    elif _cmd_exists copyq; then
+        step "CopyQ is already installed"
+    fi
+}
+
+# Wrapper for installing all GUI tools
 bootstrap_gui() {
     if [[ x$DISPLAY == x ]]; then
         step "Bootstrapping for GUI is disabled"
@@ -145,15 +193,17 @@ bootstrap_gui() {
     local DISTRO="$(lsb_release -i | \grep ID: | cut -d: -f2 | tr -d '[:space:]')"
     if [[ -f "/etc/debian_version" ]]; then
         step "Setting up OS with additional GUI tools and software"
-        post_setup_brave
-        post_setup_burp
-        post_setup_signal_desktop
-        post_setup_flameshot
+        gui_setup_brave
+        gui_setup_burp
+        gui_setup_signal_desktop
+        gui_setup_flameshot
+        gui_setup_obsidian
     else
         step "This is not a Debian-based OS - skipping"
     fi
 }
 
+# Wrapper for simple system pre-setup
 bootstrap_system() {
     echo
     if ! _cmd_exists ufw; then
@@ -168,6 +218,11 @@ bootstrap_system() {
     step "UFW ready"
 }
 
+# ------------------------------------------------------------
+
+# Installation of CLI tools
+
+# Extensions for VSCode
 vscode_base_extensions=(
     ms-python.black-formatter          # Black Formatter
     ms-vscode-remote.remote-containers # Dev Containers
@@ -491,48 +546,6 @@ bootstrap_c4p() {
 
 }
 
-bootstrap_obsidian() {
-    echo
-    OBSIDIAN_LATEST_VERSION=$(curl -sL https://github.com/obsidianmd/obsidian-releases/releases | \grep -P 'obsidian-releases/tree/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}"' | awk -F'tree/v' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
-    if _cmd_exists obsidian; then
-            step "Obsidian is already installed"
-            return
-    fi
-    if [[ -f "/etc/debian_version" ]]; then
-        step "Installing Obsidian on Debian-based system"
-        step "  Installing version $OBSIDIAN_LATEST_VERSION"
-        step "  Downloading official release"
-        curl -# -SL "https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_LATEST_VERSION}/obsidian_${OBSIDIAN_LATEST_VERSION}_amd64.deb" --output /tmp/obsidian_${OBSIDIAN_LATEST_VERSION}.deb && \
-        {
-            sudo dpkg -i /tmp/obsidian_${OBSIDIAN_LATEST_VERSION}.deb && \
-            step "Obsidian installed"
-        } || step "Failed to install Obsidian"
-    fi
-}
-
-bootstrap_copyq() {
-    echo
-    # Debian-based system
-    if ! _cmd_exists copyq && [[ -f "/etc/debian_version" ]]; then
-        step "Installing CopyQ"
-        echo "You may need to type in your sudo password:"
-        sudo -v
-        sudo apt-get update -yqq
-        sudo apt-get install --show-progress -yqq copyq
-        sh -c 'nohup copyq > /dev/null 2>&1 &'
-        step "CopyQ installed"
-    # MacOS
-    elif ! _cmd_exists copyq && [[ "$(uname)" == "Darwin" ]] && _cmd_exists brew; then
-        step "Installing CopyQ"
-        brew install --cask copyq
-        copyq &
-        step "CopyQ installed"
-    elif _cmd_exists copyq; then
-        step "CopyQ is already installed"
-    fi
-
-}
-
 bootstrap_cryptomator-cli() {
     echo
     CRYPTO_CLI_LATEST_VERSION=$(curl -sL https://github.com/cryptomator/cli/releases | \grep -P 'cryptomator/cli/tree/[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}"' | awk -F'tree/' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
@@ -618,6 +631,38 @@ bootstrap_micro() {
     step "Micro installed"
 }
 
+bootstrap_tldr() {
+    echo
+    # Debian-based system
+    if ! _cmd_exists tldr && [[ -f "/etc/debian_version" ]]; then
+        _cmd_exists apt-get || {
+            step "apt-get not installed - exiting"
+            exit 1
+        }
+        echo "You may need to type in your sudo password:"
+        sudo -v
+        step "Installing tldr dependencies"
+        sudo apt-get install --show-progress -yqq build-essential gcc libcurl4-openssl-dev libzip-dev pkg-config
+
+        step "Installing tldr"
+        local clone_dir=$(mktemp -d)
+        # https://github.com/tldr-pages/tldr-c-client?tab=readme-ov-file#building
+        git clone https://github.com/tldr-pages/tldr-c-client.git $clone_dir
+        cd $clone_dir
+        make && \
+        sudo make install && \
+        tldr -u && \
+        rm -rf $clone_dir
+    elif _cmd_exists tldr; then
+        step "tldr is already installed"
+    fi
+
+}
+
+# ------------------------------------------------------------
+
+# Main script handler and flags
+
 tool_to_bootstrap=
 bt_system=false
 list_tools=false
@@ -651,6 +696,10 @@ while [ -n "$1" ]; do
         list_default_code_ext=true
         shift 0
         ;;
+    --gui-tool)
+        gui_tool_to_bootstrap="$2"
+        shift
+        ;;
     -v | --verbose)
         set -x
         shift 0
@@ -669,8 +718,14 @@ local EXCLUDED_PACKAGES='system\|gui\|c4p'
 # List all possible tools to bootstrap
 if [[ "$list_tools" == true ]]; then
     all_tools=$(typeset -f | \grep -e "^bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f2 | cut -d' ' -f1)
+    all_gui_tools=$(typeset -f | \grep -e "^gui\_setup\_" | cut -d'_' -f3,4 | cut -d' ' -f1)
+    echo '--- CLI ---' 
     echo $all_tools | sort
-    echo '---'
+    echo
+    echo '--- GUI ---' 
+    echo $all_gui_tools | sort
+    echo
+    echo '--- GROUPS ---'
     echo all
     echo c4p
     echo gui
@@ -687,8 +742,8 @@ if [[ "$list_default_code_ext" == true ]]; then
     exit 0
 fi
 
-# Main part
-if [[ $bt_system == false ]] && [ -z "$tool_to_bootstrap" ]; then
+# Handle rest of the flags
+if [[ $bt_system == false ]] && ([ -z "$tool_to_bootstrap" -a -z "$gui_tool_to_bootstrap" ]); then
     show_help
     exit 0
 fi
@@ -697,6 +752,7 @@ if [[ $bt_system == true ]]; then
     bootstrap_system
 fi
 
+# User passed the CLI tools as a coma-separated list
 IFS=',' read -r -A few_tools_to_bootstrap <<< "$tool_to_bootstrap"
 
 for tool_to_bootstrap in "${few_tools_to_bootstrap[@]}"
@@ -723,6 +779,20 @@ do
             exit 0
         else
             bootstrap_"$tool_to_bootstrap"
+        fi
+    fi
+done
+
+# User passed the GUI tools as a coma-separated list
+IFS=',' read -r -A gui_tools_to_bootstrap <<< "$gui_tool_to_bootstrap"
+for gui_tool_to_bootstrap in "${gui_tools_to_bootstrap[@]}"
+do
+    if [[ -n "${gui_tool_to_bootstrap}" ]]; then
+        if type gui_setup_"$gui_tool_to_bootstrap" | grep -q "not found"; then
+            step "GUI bootstrap for $gui_tool_to_bootstrap not implemented - exiting"
+            exit 1
+        else
+            gui_setup_"$gui_tool_to_bootstrap"
         fi
     fi
 done
