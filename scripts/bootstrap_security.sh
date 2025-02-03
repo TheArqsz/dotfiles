@@ -190,13 +190,35 @@ security_bootstrap_wordlists() {
         }
         mkdir -p /opt/Tools/wordlists/assetnote/lists/{automated,technologies}
         cat /opt/Tools/wordlists/assetnote/data/automated.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 | \
-            xargs -I {} wget -nH -e robots=off -q --show-progress -P /opt/Tools/wordlists/assetnote/lists/automated {}
+            xargs -I {} wget -nH -e robots=off -q --show-progress -nc -P /opt/Tools/wordlists/assetnote/lists/automated {}
         cat /opt/Tools/wordlists/assetnote/data/technologies.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 | \
             xargs -I {} wget -nH -e robots=off -q --show-progress -nc -P /opt/Tools/wordlists/assetnote/lists/technologies {}
 
         step "wordlists are installed"
     else
         step "Python or venv are not installed - skipping"
+    fi
+}
+
+security_bootstrap_nomore403() {
+    echo
+    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+        step "Installing nomore403"
+        go install -v github.com/devploit/nomore403@latest
+        step "nomore403 tool is installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_jsluice() {
+    echo
+    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+        step "Installing jsluice"
+        go install -v github.com/BishopFox/jsluice/cmd/jsluice@latest
+        step "jsluice tool is installed"
+    else
+        step "Golang is not installed - skipping"
     fi
 }
 

@@ -35,7 +35,15 @@ Options:
     --code-extensions      Additional VSCode extensions to install
     --list-default-ext     List default VSCode extensions
 
+    security               Run the security module
+
     -h, --help             Show this help message and exit
+
+Security Module Options:
+    bootstrap security [options]
+
+Options:
+    -h, --help             Show help message and exit
 %
 }
 

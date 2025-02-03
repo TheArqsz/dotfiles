@@ -50,5 +50,13 @@
   {
     "id": "anngjobjhcbancaaogmlcffohpmcniki",
     "name": "S3BucketList"
+  },
+  {
+    "id": "lkpfjhmpbmpflldmdpdoabimdbaclolp",
+    "name": "DOMLogger"
+  },
+  {
+    "id": "ofaokhiedipichpaobibbnahnkdoiiah",
+    "name": "Instant Data Scraper"
   }
 ]
