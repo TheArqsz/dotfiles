@@ -305,6 +305,9 @@ fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -1 --color=always
 zstyle ':fzf-tab:complete:(-command-|-parameter-|-brace-parameter-|export|unset|expand):*' \
 fzf-preview 'echo ${(P)word}'
 zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup # https://github.com/Aloxaf/fzf-tab?tab=readme-ov-file#tmux
+zstyle ':fzf-tab:*' popup-min-size 70 8
+# only apply to 'diff'
+zstyle ':fzf-tab:complete:diff:*' popup-min-size 80 12
 # Preivew `systemctl` command
 # https://github.com/seagle0128/dotfiles/blob/master/.zshrc
 zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
