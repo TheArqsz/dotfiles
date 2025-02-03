@@ -113,21 +113,6 @@ gui_setup_brave() {
     step "      brave://extensions/"
 }
 
-gui_setup_burp() {
-    echo
-    if ! _cmd_exists burpsuite && ! _cmd_exists BurpSuitePro; then
-        step "Installing Burp Suite"
-        local LATEST_VERSION="$(curl -s https://portswigger.net/burp/releases | \grep -E 'Professional / Community [0-9]{4}\.[0-9]+(\.[0-9]+)?' | awk -F 'Community ' '{print $2}' | cut -d'<' -f1 | head -n1)"
-        step "  Downloading official installer"
-        curl -# -SL 'https://portswigger-cdn.net/burp/releases/download?product=pro&version='$LATEST_VERSION'&type=Linux' -o burp_installer
-        chmod +x ./burp_installer && sudo ./burp_installer
-        rm ./burp_installer
-        step "Burp Suite is installed"
-    else
-        step "Burp Suite is already installed"
-    fi
-}
-
 gui_setup_flameshot() {
     echo
     if ! _cmd_exists flameshot && [[ -f "/etc/debian_version" ]]; then
@@ -194,7 +179,6 @@ bootstrap_gui() {
     if [[ -f "/etc/debian_version" ]]; then
         step "Setting up OS with additional GUI tools and software"
         gui_setup_brave
-        gui_setup_burp
         gui_setup_signal_desktop
         gui_setup_flameshot
         gui_setup_obsidian
@@ -670,6 +654,15 @@ additional_code_extensions=
 list_default_code_ext=false
 
 # CLI Parameters
+if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+elif [[ $1 == "security" ]]; then
+    # Security module
+    shift 
+    source "$DOTFILES/scripts/bootstrap_security.sh" "$@"
+    exit 0
+fi
 while [ -n "$1" ]; do
     case "$1" in
     -h | --help)
@@ -677,6 +670,10 @@ while [ -n "$1" ]; do
         exit
         ;;
     -t | --tool)
+        if [ $# -lt 2 ]; then
+            echo "Missing argument for --tool"
+            exit 1
+        fi
         tool_to_bootstrap="$2"
         shift
         ;;
@@ -689,6 +686,10 @@ while [ -n "$1" ]; do
         shift 0
         ;;
     --code-extensions)
+        if [ $# -lt 2 ]; then
+            echo "Missing argument for --code-extensions"
+            exit 1
+        fi
         additional_code_extensions="$2"
         shift
         ;;
@@ -697,6 +698,10 @@ while [ -n "$1" ]; do
         shift 0
         ;;
     --gui-tool)
+        if [ $# -lt 2 ]; then
+            echo "Missing argument for --gui-tool"
+            exit 1
+        fi
         gui_tool_to_bootstrap="$2"
         shift
         ;;
@@ -773,9 +778,7 @@ do
             for tool in "${all_tools_sorted[@]}"; do
                 bootstrap_"$tool"
             done
-            # while IFS=$'\n' read -r tool; do
-            #     bootstrap_"$tool"
-            # done <<< "$all_tools_sorted"
+
             exit 0
         else
             bootstrap_"$tool_to_bootstrap"

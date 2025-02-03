@@ -430,3 +430,8 @@ fi
 
 # TLDR-c
 export TLDR_AUTO_UPDATE_DISABLED=1
+
+# PDTM
+if $(command -v pdtm >/dev/null); then
+  export PATH=$PATH:$HOME/.pdtm/go/bin
+fi
