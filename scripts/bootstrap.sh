@@ -121,6 +121,21 @@ gui_setup_brave() {
     step "      brave://extensions/"
 }
 
+gui_setup_chrome() {
+    echo
+    if ! _cmd_exists google-chrome; then
+        step "Installing Google Chrome"
+        if ! _cmd_exists curl; then
+            step "Installing Google Chrome dependency - curl"
+            sudo apt-get install --show-progress -yqq curl
+        fi
+        curl -# -SL "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" --output /tmp/google-chrome-stable_current_amd64.deb
+        sudo apt install -yq /tmp/google-chrome-stable_current_amd64.deb
+    else
+        step "Google Chrome is already installed"
+    fi
+}
+
 gui_setup_flameshot() {
     echo
     if ! _cmd_exists flameshot && [[ -f "/etc/debian_version" ]]; then

@@ -124,7 +124,7 @@ security_bootstrap_github-subdomains() {
     echo
     if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
         step "Installing github-subdomains"
-        go install github.com/gwen001/github-subdomains@latest
+        go install -v github.com/gwen001/github-subdomains@latest
         step "github-subdomains tool is installed"
     else
         step "Golang is not installed - skipping"
@@ -219,6 +219,87 @@ security_bootstrap_jsluice() {
         step "jsluice tool is installed"
     else
         step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_brutespray() {
+    # https://github.com/x90skysn3k/brutespray
+    # https://github.com/Arcanum-Sec/brutespray
+    echo
+    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+        step "Installing brutespray"
+        go install -v github.com/x90skysn3k/brutespray@latest
+        step "brutespray tool is installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_nomore403() {
+    # https://github.com/jhaddix/nomore403
+    # https://github.com/devploit/nomore403
+    echo
+    if [[ -f "/etc/debian_version" ]]; then
+        NOMORE403_LATEST_VERSION=$(curl -sSL https://github.com/devploit/nomore403/releases | \grep -E 'devploit/nomore403/tree' | awk -F'tree/' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+        if _cmd_exists nomore403; then
+            sha256_latest="$(curl -# -sSL "https:/github.com/devploit/nomore403/releases/download/$NOMORE403_LATEST_VERSION/checksums.txt" -o - | \grep nomore403_linux_amd64 | awk '{print $1}')"
+            sha256_installed="$(sha1sum "$(which nomore403)" | awk '{print $1}')"
+            if [ "$md5_1" = "$md5_2" ]; then
+                step "Skipping update"
+                return
+            else
+                step "Updating nomore403"
+            fi
+        else
+            step "Installing nomore403"
+        fi
+        curl -# -SL "https:/github.com/devploit/nomore403/releases/download/$NOMORE403_LATEST_VERSION/nomore403_linux_amd64" --output /tmp/nomore403_${NOMORE403_LATEST_VERSION}
+        sudo mv /tmp/nomore403_${NOMORE403_LATEST_VERSION} /usr/local/bin/nomore403
+        sudo chmod +x /usr/local/bin/nomore403
+        step "nomore403 installed"
+    else
+        step "nomore403 is not installed - skipping"
+    fi
+}
+
+security_bootstrap_caduceus() {
+    # https://github.com/g0ldencybersec/Caduceus
+    # https://github.com/jhaddix/Caduceus
+    echo
+    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+        step "Installing caduceus"
+        sudo apt-get install --show-progress -yqq gcc
+        go install -v github.com/g0ldencybersec/Caduceus/cmd/caduceus@latest
+        step "caduceus tool is installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_msftrecon() {
+    echo
+    if ! _cmd_exists msftrecon && _cmd_exists python && $(python -m venv -h 2>&1 1>/dev/null); then
+        step "Installing msftrecon"
+        echo "You may need to type in your sudo password:"
+        sudo -v
+        sudo chmod a+rwx /opt
+        mkdir -p /opt/Tools
+        step "Cloning the repository"
+        git clone https://github.com/Arcanum-Sec/msftrecon /opt/Tools/msftrecon 2>/dev/null || {
+            echo "msftrecon repository is already cloned"
+        }
+        python -m venv /opt/Tools/msftrecon/venv
+        /opt/Tools/msftrecon/venv/bin/pip install -r /opt/Tools/msftrecon/requirements.txt
+        /opt/Tools/msftrecon/venv/bin/pip install setuptools
+        /opt/Tools/msftrecon/venv/bin/python /opt/Tools/msftrecon/setup.py install
+        echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/msftrecon 1>/dev/null
+        echo '/opt/Tools/msftrecon/venv/bin/msftrecon "$@"' | sudo tee -a /usr/local/bin/msftrecon 1>/dev/null
+        sudo chmod +x /usr/local/bin/msftrecon
+        step "msftrecon tool is installed"
+    elif _cmd_exists msftrecon; then
+        step "msftrecon is already installed"
+    else
+        step "Python or venv are not installed - skipping"
     fi
 }
 
