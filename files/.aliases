@@ -21,6 +21,12 @@ if (( $+commands[fdfind] )); then
     alias find=fd
 fi
 
+# Burp Suite Pro
+if (( $+commands[BurpSuitePro] )); then
+    alias burp=BurpSuitePro
+    alias burpsuite=BurpSuitePro
+fi
+
 # grep: color and show the line
 # number for each match:
 alias grep="grep -n --color" 

@@ -114,6 +114,7 @@ security_bootstrap_projectdiscovery() {
         pdtm -dc -nc -duc \
             -i subfinder,tldfinder,naabu,notify,nuclei,shuffledns,httpx,dnsx,asnmap
         # Update templates
+        reload 
         nuclei -nc -nm -ut 
     else
         step "Golang is not installed - skipping"
@@ -303,6 +304,67 @@ security_bootstrap_msftrecon() {
     fi
 }
 
+security_bootstrap_trufflehog() {
+    echo
+    if ! _cmd_exists trufflehog && _cmd_exists go; then
+        step "Installing trufflehog"
+        echo "You may need to type in your sudo password:"
+        sudo -v
+        sudo chmod a+rwx /opt
+        mkdir -p /opt/Tools
+        step "Cloning the repository"
+        git clone https://github.com/trufflesecurity/trufflehog.git /opt/Tools/trufflehog 2>/dev/null || {
+            echo "trufflehog repository is already cloned"
+        }
+        cd /opt/Tools/trufflehog
+        
+        step "Building trufflehog"
+        go install -v
+        step "trufflehog is installed"
+    elif _cmd_exists trufflehog; then
+        step "trufflehog is already installed"
+    else
+        step "golang is not installed"
+    fi
+}
+
+security_bootstrap_gitleaks() {
+    echo
+    if ! _cmd_exists gitleaks && _cmd_exists go; then
+        step "Installing gitleaks"
+        echo "You may need to type in your sudo password:"
+        sudo -v
+        sudo chmod a+rwx /opt
+        mkdir -p /opt/Tools
+        step "Cloning the repository"
+        git clone https://github.com/gitleaks/gitleaks.git /opt/Tools/gitleaks 2>/dev/null || {
+            echo "gitleaks repository is already cloned"
+        }
+        cd /opt/Tools/gitleaks
+        step "Building gitleaks"
+        make build
+        [ -f gitleaks ] && sudo mv gitleaks /usr/local/bin/gitleaks
+        step "gitleaks is installed"
+    elif _cmd_exists gitleaks; then
+        step "gitleaks is already installed"
+    else
+        step "golang is not installed"
+    fi
+}
+
+security_bootstrap_waybackurls() {
+    echo
+    if ! _cmd_exists waybackurls && _cmd_exists go; then
+        step "Installing waybackurls"
+        go install -v github.com/tomnomnom/waybackurls@latest
+        step "waybackurls tool is installed"
+    elif _cmd_exists waybackurls; then
+        step "waybackurls is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
 # ------------------------------------------------------------
 
 # Installation of GUI tools
@@ -319,6 +381,21 @@ security_gui_setup_burp() {
         step "Burp Suite is installed"
     else
         step "Burp Suite is already installed"
+    fi
+}
+
+security_gui_setup_burp_community() {
+    echo
+    if ! _cmd_exists burpsuite; then
+        step "Installing Burp Suite Community"
+        local LATEST_VERSION="$(curl -s https://portswigger.net/burp/releases | \grep -E 'Professional / Community [0-9]{4}\.[0-9]+(\.[0-9]+)?' | awk -F 'Community ' '{print $2}' | cut -d'<' -f1 | head -n1)"
+        step "  Downloading official installer"
+        curl -# -SL 'https://portswigger-cdn.net/burp/releases/download?product=community&version='$LATEST_VERSION'&type=Linux' -o burp_installer
+        chmod +x ./burp_installer && sudo ./burp_installer
+        rm ./burp_installer
+        step "Burp Suite Community is installed"
+    else
+        step "Burp Suite Community is already installed"
     fi
 }
 

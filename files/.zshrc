@@ -20,7 +20,7 @@ export CLICOLOR=1
 export CLICOLOR_FORCE=1
 
 # Custom PATH
-export PATH="$PATH:/home/user/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/sbin:$HOME/go/bin"
+export PATH="$PATH:/home/$USER/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/sbin:$HOME/go/bin"
 
 # Include alias file (if present) containing aliases for ssh, etc.
 if [ -f ~/.aliases ]
@@ -431,7 +431,9 @@ fi
 # TLDR-c
 export TLDR_AUTO_UPDATE_DISABLED=1
 
+
 # PDTM
 if $(command -v pdtm >/dev/null); then
+  # Generated for pdtm. Do not edit.
   export PATH=$PATH:$HOME/.pdtm/go/bin
 fi

@@ -205,6 +205,7 @@ bootstrap_gui() {
         gui_setup_signal_desktop
         gui_setup_flameshot
         gui_setup_obsidian
+        gui_setup_copyq
     else
         step "This is not a Debian-based OS - skipping"
     fi
@@ -246,11 +247,14 @@ vscode_base_extensions=(
     ms-vscode-remote.remote-ssh        # Remote SSH
     Gruntfuggly.todo-tree              # Todo Tree
     redhat.vscode-yaml                 # YAML
+    tomoki1207.pdf                     # PDF Viewer
+    ms-vscode-remote.remote-wsl        # WSL
+    GitHub.copilot                     # Github Copilot
 )
 
 bootstrap_code() {
     echo
-    step "Setting up VSCode with extensions"
+    step "Setting up VSCode with extensions and config"
     # WSL
     if ! _cmd_exists code && [[ "$(uname -r)" == *"microsoft"* ]]; then
         step "Working in WSL - install VSCode on your host"
@@ -280,6 +284,7 @@ bootstrap_code() {
         step "VSCode is already installed"
     fi
     if _cmd_exists code; then
+        # Handle extensions - if already installed it updates them with '--force'
         # https://code.visualstudio.com/docs/editor/command-line#_working-with-extensions
         step "Setting up VSCode extensions"
         if ! [ -z "$additional_code_extensions" ]; then
@@ -304,11 +309,16 @@ bootstrap_code() {
         mkdir -p "$HOME/Library/Application Support/Code/User/" &&
             cp "$DOTFILES/misc/vscode-settings.json" "$HOME/Library/Application Support/Code/User/settings.json"
     elif [[ "$(uname -r)" == *"microsoft"* ]]; then
+        # Handle the main VSCode instance within the Windows
         local APPDATA="$(cmd.exe /c echo %APPDATA% 2>/dev/null)"
         local WINDOWS_CODE_SETTINGS="$(wslpath $APPDATA | tr -d '\r')/Code/User/settings.json"
         echo -E "Copying $DOTFILES/misc/vscode-settings.json to $(wslpath $APPDATA | tr -d '\r')/Code/User/settings.json"
         cp "$WINDOWS_CODE_SETTINGS" "$WINDOWS_CODE_SETTINGS".old_$(date +%s)
         cp "$DOTFILES/misc/vscode-settings.json" "$WINDOWS_CODE_SETTINGS"
+        
+        # Handle WSL itself
+        mkdir -p "$HOME/.config/Code/User/" &&
+            cp "$DOTFILES/misc/vscode-settings.json" "$HOME/.config/Code/User/settings.json"
         echo
     elif [[ "$(uname)" == "Linux" ]]; then
         mkdir -p "$HOME/.config/Code/User/" &&
@@ -408,6 +418,10 @@ bootstrap_golang() {
     else
         step "Golang is already installed"
     fi
+}
+
+bootstrap_go() {
+    bootstrap_golang
 }
 
 bootstrap_fzf() {

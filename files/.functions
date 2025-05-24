@@ -291,3 +291,28 @@ function mount_remote_vault {
         exit 1
     fi
 }
+
+function convert_jwt {
+    local jwt="$1"
+    local header=$(echo "$jwt" | cut -d '.' -f 1)
+    local payload=$(echo "$jwt" | cut -d '.' -f 2)
+    local signature=$(echo "$jwt" | cut -d '.' -f 3)
+
+    # Decode the header and payload
+    local decoded_header=$(echo "$header" | base64 --decode 2>/dev/null)
+    local decoded_payload=$(echo "$payload" | base64 --decode 2>/dev/null)
+
+    # Check if decoding was successful
+    if [[ $? -ne 0 ]]; then
+        echo "Error: Invalid JWT format."
+        return 1
+    fi
+
+    # Print the decoded header and payload
+    echo "Decoded Header:"
+    echo "$decoded_header"
+    echo
+    echo "Decoded Payload:"
+    echo "$decoded_payload"
+    echo
+}
