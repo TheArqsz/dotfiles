@@ -112,9 +112,9 @@ security_bootstrap_projectdiscovery() {
         security_bootstrap_massdns
 
         pdtm -dc -nc -duc \
-            -i subfinder,tldfinder,naabu,notify,nuclei,shuffledns,httpx,dnsx,asnmap
+            -i subfinder,tldfinder,naabu,notify,nuclei,shuffledns,httpx,dnsx,asnmap,chaos-client 
         # Update templates
-        reload 
+        source $HOME/.zshrc
         nuclei -nc -nm -ut 
     else
         step "Golang is not installed - skipping"
@@ -132,9 +132,9 @@ security_bootstrap_github-subdomains() {
     fi
 }
 
-security_bootstrap_check-mdi() {
+security_bootstrap_check_mdi() {
     echo
-    if ! _cmd_exists check-mdi && _cmd_exists python && $(python -m venv -h 2>&1 1>/dev/null); then
+    if ! _cmd_exists check_mdi && _cmd_exists python && $(python -m venv -h 2>&1 1>/dev/null); then
         step "Installing check-mdi"
         echo "You may need to type in your sudo password:"
         sudo -v
@@ -145,11 +145,11 @@ security_bootstrap_check-mdi() {
         }
         python -m venv /opt/Tools/check_mdi/venv
         /opt/Tools/check_mdi/venv/bin/pip install -r /opt/Tools/check_mdi/requirements.txt
-        echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/check-mdi 1>/dev/null
-        echo '/opt/Tools/check_mdi/venv/bin/python /opt/Tools/check_mdi/check_mdi.py "$@"' | sudo tee -a /usr/local/bin/check-mdi 1>/dev/null
-        sudo chmod +x /usr/local/bin/check-mdi
+        echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/check_mdi 1>/dev/null
+        echo '/opt/Tools/check_mdi/venv/bin/python /opt/Tools/check_mdi/check_mdi.py "$@"' | sudo tee -a /usr/local/bin/check_mdi 1>/dev/null
+        sudo chmod +x /usr/local/bin/check_mdi
         step "check_mdi tool is installed"
-    elif _cmd_exists check-mdi; then
+    elif _cmd_exists check_mdi; then
         step "check-mdi is already installed"
     else
         step "Python or venv are not installed - skipping"
@@ -360,6 +360,131 @@ security_bootstrap_waybackurls() {
         step "waybackurls tool is installed"
     elif _cmd_exists waybackurls; then
         step "waybackurls is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_assetfinder() {
+    echo
+    if ! _cmd_exists assetfinder && _cmd_exists go; then
+        step "Installing assetfinder"
+        go install -v github.com/tomnomnom/assetfinder@latest
+        step "assetfinder tool is installed"
+    elif _cmd_exists assetfinder; then
+        step "assetfinder is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_unfurl() {
+    echo
+    if ! _cmd_exists unfurl && _cmd_exists go; then
+        step "Installing unfurl"
+        go install -v github.com/tomnomnom/unfurl@latest
+        step "unfurl tool is installed"
+    elif _cmd_exists unfurl; then
+        step "unfurl is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_cero() {
+    echo
+    if ! _cmd_exists cero && _cmd_exists go; then
+        step "Installing cero"
+        go install -v github.com/glebarez/cero@latest
+        step "cero tool is installed"
+    elif _cmd_exists cero; then
+        step "cero is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_puredns() {
+    echo
+    if ! _cmd_exists puredns && _cmd_exists go; then
+        if ! _cmd_exists massdns; then
+            step "massdns is required for puredns. Installing massdns..."
+            security_bootstrap_massdns
+        fi
+        step "Installing puredns"
+        go install -v github.com/d3mondev/puredns/v2@latest
+        step "puredns tool is installed"
+    elif _cmd_exists puredns; then
+        step "puredns is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_amass() {
+    echo
+    if ! _cmd_exists amass && _cmd_exists go; then
+        step "Installing amass"
+        go install -v github.com/owasp-amass/amass/v4/...@master
+        step "amass tool is installed"
+    elif _cmd_exists amass; then
+        step "amass is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_csprecon() {
+    echo
+    if ! _cmd_exists csprecon && _cmd_exists go; then
+        step "Installing csprecon"
+        go install -v github.com/edoardottt/csprecon/cmd/csprecon@latest
+        step "csprecon tool is installed"
+    elif _cmd_exists csprecon; then
+        step "csprecon is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_shosubgo() {
+    echo
+    if ! _cmd_exists shosubgo && _cmd_exists go; then
+        step "Installing shosubgo"
+        go install -v github.com/incogbyte/shosubgo@latest
+        step "shosubgo tool is installed"
+    elif _cmd_exists shosubgo; then
+        step "shosubgo is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_CloudRecon() {
+    echo
+    if ! _cmd_exists CloudRecon && _cmd_exists go; then
+        sudo apt-get install --show-progress -yqq gcc
+        step "Installing CloudRecon"
+        go install -v github.com/g0ldencybersec/CloudRecon@latest
+        step "CloudRecon tool is installed"
+    elif _cmd_exists CloudRecon; then
+        step "CloudRecon is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_getallurls() {
+    echo
+    if ! _cmd_exists getallurls && _cmd_exists go; then
+        step "Installing gau"
+        go install -v github.com/lc/gau/v2/cmd/gau@latest
+        echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/getallurls 1>/dev/null
+        echo '$GOPATH/bin/gau "$@"' | sudo tee -a /usr/local/bin/getallurls 1>/dev/null
+        sudo chmod +x /usr/local/bin/getallurls
+        step "getallurls tool is installed"
+    elif _cmd_exists getallurls; then
+        step "getallurls is already installed"
     else
         step "Golang is not installed - skipping"
     fi
