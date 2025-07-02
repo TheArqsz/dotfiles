@@ -132,6 +132,17 @@ security_bootstrap_github-subdomains() {
     fi
 }
 
+security_bootstrap_gitlab-subdomains() {
+    echo
+    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+        step "Installing gitlab-subdomains"
+        go install -v github.com/gwen001/gitlab-subdomains@latest
+        step "gitlab-subdomains tool is installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
 security_bootstrap_check_mdi() {
     echo
     if ! _cmd_exists check_mdi && _cmd_exists python && $(python -m venv -h 2>&1 1>/dev/null); then
@@ -164,36 +175,75 @@ security_bootstrap_wordlists() {
         sudo -v
         sudo chmod a+rwx /opt
         mkdir -p /opt/Tools/wordlists
-        echo "  > OneListForAll"
-        git clone https://github.com/six2dez/OneListForAll /opt/Tools/wordlists/OneListForAll || {
-            echo "OneListForAll repository is already cloned" && \
-            cd /opt/Tools/wordlists/OneListForAll && \
-            git fetch --all && \
-            git reset --hard HEAD && \
-            git pull
-        }
-        echo "  > SecLists"
-        git clone https://github.com/danielmiessler/SecLists /opt/Tools/wordlists/SecLists || {
-            echo "SecLists repository is already cloned" && \
-            cd /opt/Tools/wordlists/SecLists && \
-            git fetch --all && \
-            git reset --hard HEAD && \
-            git pull
-        }
-        echo "  > assetnote"
-        sudo apt-get install jq -yqq --show-progress
-        git clone https://github.com/assetnote/wordlists /opt/Tools/wordlists/assetnote || {
-            echo "assetnote wordlists repository is already cloned" && \
-            cd /opt/Tools/wordlists/assetnote && \
-            git fetch --all && \
-            git reset --hard HEAD && \
-            git pull
-        }
-        mkdir -p /opt/Tools/wordlists/assetnote/lists/{automated,technologies}
-        cat /opt/Tools/wordlists/assetnote/data/automated.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 | \
-            xargs -I {} wget -nH -e robots=off -q --show-progress -nc -P /opt/Tools/wordlists/assetnote/lists/automated {}
-        cat /opt/Tools/wordlists/assetnote/data/technologies.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 | \
-            xargs -I {} wget -nH -e robots=off -q --show-progress -nc -P /opt/Tools/wordlists/assetnote/lists/technologies {}
+        local choice
+        echo -n "Do you want to install OneListForAll? (y/n): "
+        read choice
+        if [[ "$choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+            echo "  > OneListForAll"
+            git clone https://github.com/six2dez/OneListForAll /opt/Tools/wordlists/OneListForAll || {
+                echo "OneListForAll repository is already cloned" && \
+                cd /opt/Tools/wordlists/OneListForAll && \
+                git fetch --all && \
+                git reset --hard HEAD && \
+                git pull
+            }
+        else
+            echo "OneListForAll skipped."
+        fi
+        
+        choice=''
+        echo -n "Do you want to install SecLists? (y/n): "
+        read choice
+        if [[ "$choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+            echo "  > SecLists"
+            git clone https://github.com/danielmiessler/SecLists /opt/Tools/wordlists/SecLists || {
+                echo "SecLists repository is already cloned" && \
+                cd /opt/Tools/wordlists/SecLists && \
+                git fetch --all && \
+                git reset --hard HEAD && \
+                git pull
+            }
+        else
+            echo "SecLists skipped."
+        fi
+        
+        choice=''
+        echo -n "Do you want to install assetnote wordlists? (y/n): "
+        read choice
+        if [[ "$choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+            echo "  > assetnote"
+            sudo apt-get install jq -yqq --show-progress
+            git clone https://github.com/assetnote/wordlists /opt/Tools/wordlists/assetnote || {
+                echo "assetnote wordlists repository is already cloned" && \
+                cd /opt/Tools/wordlists/assetnote && \
+                git fetch --all && \
+                git reset --hard HEAD && \
+                git pull
+            }
+            mkdir -p /opt/Tools/wordlists/assetnote/lists/{automated,technologies}
+            cat /opt/Tools/wordlists/assetnote/data/automated.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 | \
+                xargs -I {} wget -nH -e robots=off -q --show-progress -nc -P /opt/Tools/wordlists/assetnote/lists/automated {}
+            cat /opt/Tools/wordlists/assetnote/data/technologies.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 | \
+                xargs -I {} wget -nH -e robots=off -q --show-progress -nc -P /opt/Tools/wordlists/assetnote/lists/technologies {}
+        else
+            echo "assetnote wordlists skipped."
+        fi
+        
+        choice=''
+        echo -n "Do you want to install n0kovo DNS wordlists? (y/n): "
+        read choice
+        if [[ "$choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+            echo "  > n0kovo DNS"
+            git clone https://github.com/n0kovo/n0kovo_subdomains /opt/Tools/wordlists/n0kovo_subdomains || {
+                echo "n0kovo DNS repository is already cloned" && \
+                cd /opt/Tools/wordlists/n0kovo_subdomains && \
+                git fetch --all && \
+                git reset --hard HEAD && \
+                git pull
+            }
+        else
+            echo "n0kovo DNS skipped."
+        fi
 
         step "wordlists are installed"
     else
@@ -214,10 +264,12 @@ security_bootstrap_nomore403() {
 
 security_bootstrap_jsluice() {
     echo
-    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+    if ! _cmd_exists jsluice && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
         step "Installing jsluice"
         go install -v github.com/BishopFox/jsluice/cmd/jsluice@latest
         step "jsluice tool is installed"
+    elif _cmd_exists jsluice; then
+        step "jsluice is already installed"
     else
         step "Golang is not installed - skipping"
     fi
@@ -227,10 +279,12 @@ security_bootstrap_brutespray() {
     # https://github.com/x90skysn3k/brutespray
     # https://github.com/Arcanum-Sec/brutespray
     echo
-    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+    if ! _cmd_exists brutespray && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
         step "Installing brutespray"
         go install -v github.com/x90skysn3k/brutespray@latest
         step "brutespray tool is installed"
+    elif _cmd_exists brutespray; then
+        step "brutespray is already installed"
     else
         step "Golang is not installed - skipping"
     fi
@@ -267,11 +321,13 @@ security_bootstrap_caduceus() {
     # https://github.com/g0ldencybersec/Caduceus
     # https://github.com/jhaddix/Caduceus
     echo
-    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+    if ! _cmd_exists caduceus && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
         step "Installing caduceus"
         sudo apt-get install --show-progress -yqq gcc
         go install -v github.com/g0ldencybersec/Caduceus/cmd/caduceus@latest
         step "caduceus tool is installed"
+    elif _cmd_exists caduceus; then
+        step "caduceus is already installed"
     else
         step "Golang is not installed - skipping"
     fi
@@ -487,6 +543,29 @@ security_bootstrap_getallurls() {
         step "getallurls is already installed"
     else
         step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_crt.sh() {
+    # https://github.com/az7rb/crt.sh
+    # https://github.com/TheArqsz/crt.sh
+    if ! _cmd_exists crt.sh; then
+        git clone https://github.com/TheArqsz/crt.sh /opt/Tools/crt.sh 2>/dev/null || {
+            echo "crt.sh repository is already cloned" && \
+            cd /opt/Tools/crt.sh && \
+            git fetch --all && \
+            git reset --hard HEAD && \
+            git pull
+        }
+        chmod +x /opt/Tools/crt.sh/crt_v2.sh
+        if [ ! -f /usr/local/bin/crt.sh ]; then
+            echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/crt.sh 1>/dev/null
+            echo '/opt/Tools/crt.sh/crt_v2.sh "$@"' | sudo tee -a /usr/local/bin/crt.sh 1>/dev/null
+            sudo chmod +x /usr/local/bin/crt.sh
+            step "crt.sh tool is installed"
+        fi
+    else
+        step "crt.sh is already installed"
     fi
 }
 
