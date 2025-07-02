@@ -81,7 +81,7 @@ security_bootstrap_massdns() {
             exit 1
         }
         step "Installing dependencies"
-        sudo apt-get install --show-progress -yqq libpcap-dev
+        sudo apt-get install --show-progress -yqq libpcap-dev make build-essential
 
         local clone_dir=$(mktemp -d)
         # https://github.com/blechschmidt/massdns#compilation
@@ -145,8 +145,8 @@ security_bootstrap_gitlab-subdomains() {
 
 security_bootstrap_check_mdi() {
     echo
-    if ! _cmd_exists check_mdi && _cmd_exists python && $(python -m venv -h 2>&1 1>/dev/null); then
-        step "Installing check-mdi"
+    if ! _cmd_exists check_mdi && _cmd_exists python3 && $(python3 -m venv -h 2>&1 1>/dev/null); then
+        step "Installing check_mdi"
         echo "You may need to type in your sudo password:"
         sudo -v
         sudo chmod a+rwx /opt
@@ -154,7 +154,7 @@ security_bootstrap_check_mdi() {
         git clone https://github.com/TheArqsz/check_mdi /opt/Tools/check_mdi 2>/dev/null || {
             echo "check_mdi repository is already cloned"
         }
-        python -m venv /opt/Tools/check_mdi/venv
+        python3 -m venv /opt/Tools/check_mdi/venv
         /opt/Tools/check_mdi/venv/bin/pip install -r /opt/Tools/check_mdi/requirements.txt
         echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/check_mdi 1>/dev/null
         echo '/opt/Tools/check_mdi/venv/bin/python /opt/Tools/check_mdi/check_mdi.py "$@"' | sudo tee -a /usr/local/bin/check_mdi 1>/dev/null
