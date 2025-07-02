@@ -123,10 +123,12 @@ security_bootstrap_projectdiscovery() {
 
 security_bootstrap_github-subdomains() {
     echo
-    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+    if ! _cmd_exists github-subdomains && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
         step "Installing github-subdomains"
         go install -v github.com/gwen001/github-subdomains@latest
         step "github-subdomains tool is installed"
+    elif _cmd_exists github-subdomains; then
+        step "github-subdomains is already installed"
     else
         step "Golang is not installed - skipping"
     fi
@@ -134,10 +136,13 @@ security_bootstrap_github-subdomains() {
 
 security_bootstrap_gitlab-subdomains() {
     echo
-    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+    if ! _cmd_exists gitlab-subdomains && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
         step "Installing gitlab-subdomains"
         go install -v github.com/gwen001/gitlab-subdomains@latest
         step "gitlab-subdomains tool is installed"
+    elif _cmd_exists gitlab-subdomains; then
+        step "gitlab-subdomains is already installed"
+    else
     else
         step "Golang is not installed - skipping"
     fi
