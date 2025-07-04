@@ -143,7 +143,6 @@ security_bootstrap_gitlab-subdomains() {
     elif _cmd_exists gitlab-subdomains; then
         step "gitlab-subdomains is already installed"
     else
-    else
         step "Golang is not installed - skipping"
     fi
 }
