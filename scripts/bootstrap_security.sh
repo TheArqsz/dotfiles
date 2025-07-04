@@ -13,6 +13,12 @@ step() {
     echo -e "## ${*}"
 }
 
+# Local reload, separate from the global reload
+_local_reload() {
+    local _current_sh="$(ps -cp "$$" -o command="")"
+    source $HOME/.${_current_sh}rc
+}
+
 # Display help message
 show_help() {
     cat <<%
@@ -72,6 +78,22 @@ security_bootstrap_code-extensions() {
     fi
 }
 
+security_bootstrap_nmap() {
+    echo
+    if ! _cmd_exists nmap && [[ -f "/etc/debian_version" ]]; then
+        step "Installing nmap"
+        _cmd_exists apt-get || {
+            step "apt-get not installed - exiting"
+            exit 1
+        }
+        sudo apt-get install --show-progress -yqq nmap
+    elif _cmd_exists nmap; then
+        step "nmap is already installed"
+    else
+        step "Not implemented on non Debian-based system - skipping"
+    fi
+}
+
 security_bootstrap_massdns() {
     echo
     if ! _cmd_exists massdns && [[ -f "/etc/debian_version" ]]; then
@@ -83,13 +105,15 @@ security_bootstrap_massdns() {
         step "Installing dependencies"
         sudo apt-get install --show-progress -yqq libpcap-dev make build-essential
 
-        local clone_dir=$(mktemp -d)
+        local _current_dir=$(pwd)
+        local _clone_dir=$(mktemp -d)
         # https://github.com/blechschmidt/massdns#compilation
-        git clone https://github.com/blechschmidt/massdns $clone_dir
-        cd $clone_dir
+        git clone https://github.com/blechschmidt/massdns $_clone_dir
+        cd $_clone_dir
         make && \
         sudo make install && \
-        rm -rf $clone_dir
+        cd "$_current_dir" && \
+        rm -rf $_clone_dir
     elif _cmd_exists massdns; then
         step "massdns is already installed"
     else
@@ -101,21 +125,55 @@ security_bootstrap_projectdiscovery() {
     echo
     if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
         step "Installing ProjectDiscovery tools with pdtm"
-        go install -v github.com/projectdiscovery/pdtm/cmd/pdtm@latest
-        step "ProjectDiscovery's Open Source Tool Manager is installed"
-        _cmd_exists apt-get || {
-            step "apt-get not installed - exiting"
-            exit 1
-        }
-        step "Installing dependencies"
-        sudo apt-get install --show-progress -yqq libpcap-dev
-        security_bootstrap_massdns
+        if ! _cmd_exists pdtm; then
+            step "Installing pdtm"
+            go install -v github.com/projectdiscovery/pdtm/cmd/pdtm@latest
+            step "ProjectDiscovery's Open Source Tool Manager is installed"
+        else
+            step "Updating pdtm"
+            pdtm -nc -dc -up
+        fi
+        
+        local -a _pdtm_tools_to_install=(
+            subfinder
+            tldfinder
+            naabu
+            notify
+            nuclei
+            shuffledns
+            httpx
+            dnsx
+            asnmap
+            chaos-client
+        )
 
-        pdtm -dc -nc -duc \
-            -i subfinder,tldfinder,naabu,notify,nuclei,shuffledns,httpx,dnsx,asnmap,chaos-client 
+        for tool in "${_pdtm_tools_to_install[@]}"; do
+            if ! _cmd_exists $tool; then
+                if [ "$tool" = "naabu" ]; then
+                    _cmd_exists apt-get || {
+                        step "apt-get not installed - exiting"
+                        exit 1
+                    }
+                    step "Installing naabu dependencies"
+                    sudo apt-get install --show-progress -yqq libpcap-dev
+                    security_bootstrap_nmap
+                elif [ "$tool" = "shuffledns" ]; then
+                    step "Installing shuffledns dependencies"
+                    security_bootstrap_massdns
+                    _local_reload
+                fi
+                pdtm -dc -nc -duc -i $tool 
+            else
+                step "$tool already installed - updating"
+                pdtm -dc -nc -duc -u $tool 2>/dev/null
+            fi
+        done
+         
         # Update templates
-        source $HOME/.zshrc
-        nuclei -nc -nm -ut 
+        _local_reload
+        if _cmd_exists nuclei; then
+            nuclei -nc -nm -ut 
+        fi
     else
         step "Golang is not installed - skipping"
     fi
@@ -149,6 +207,10 @@ security_bootstrap_gitlab-subdomains() {
 
 security_bootstrap_check_mdi() {
     echo
+    if ! _cmd_exists python3;  then 
+        step "Installing check_mdi dependencies"
+        sudo apt-get install --show-progress -yqq python3 python3-venv
+    fi
     if ! _cmd_exists check_mdi && _cmd_exists python3 && $(python3 -m venv -h 2>&1 1>/dev/null); then
         step "Installing check_mdi"
         echo "You may need to type in your sudo password:"
@@ -470,6 +532,7 @@ security_bootstrap_puredns() {
         if ! _cmd_exists massdns; then
             step "massdns is required for puredns. Installing massdns..."
             security_bootstrap_massdns
+            _local_reload
         fi
         step "Installing puredns"
         go install -v github.com/d3mondev/puredns/v2@latest
@@ -553,7 +616,9 @@ security_bootstrap_getallurls() {
 security_bootstrap_crt.sh() {
     # https://github.com/az7rb/crt.sh
     # https://github.com/TheArqsz/crt.sh
+    echo
     if ! _cmd_exists crt.sh; then
+        step "Installing the fork of crt.sh"
         git clone https://github.com/TheArqsz/crt.sh /opt/Tools/crt.sh 2>/dev/null || {
             echo "crt.sh repository is already cloned" && \
             cd /opt/Tools/crt.sh && \
