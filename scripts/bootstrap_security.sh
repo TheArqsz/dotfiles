@@ -693,6 +693,19 @@ security_bootstrap_cut-cdn() {
     fi
 }
 
+security_bootstrap_ffuf() {
+    echo
+    if ! _cmd_exists ffuf && _cmd_exists go; then
+        step "Installing ffuf"
+        go install -v github.com/ffuf/ffuf/v2@latest
+        step "ffuf tool is installed"
+    elif _cmd_exists ffuf; then
+        step "ffuf is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
 # ------------------------------------------------------------
 
 # Installation of GUI tools
