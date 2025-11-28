@@ -442,7 +442,7 @@ export TLDR_AUTO_UPDATE_DISABLED=1
 
 
 # PDTM
-if $(command -v pdtm >/dev/null); then
+if command -v pdtm >/dev/null; then
   # Generated for pdtm. Do not edit.
   export PATH=$PATH:$HOME/.pdtm/go/bin
 fi
