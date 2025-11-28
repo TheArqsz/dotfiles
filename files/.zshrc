@@ -11,7 +11,9 @@ if [[ -f /etc/os-release ]] && [[ "$(awk -F= '/^NAME/{print $2}' /etc/os-release
 fi
 
 # TERM
-export TERM=xterm-256color
+if [[ "$TERM" == "dumb" ]] || [[ -z "$TERM" ]]; then
+  export TERM=xterm-256color
+fi
 export DOTFILES="$HOME/.dotfiles"
 
 # Colors
@@ -20,7 +22,7 @@ export CLICOLOR=1
 export CLICOLOR_FORCE=1
 
 # Custom PATH
-export PATH="$PATH:/home/$USER/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/sbin:$HOME/go/bin"
+export PATH="$PATH:$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/sbin:$HOME/go/bin"
 
 # Include alias file (if present) containing aliases for ssh, etc.
 if [ -f ~/.aliases ]
@@ -43,10 +45,13 @@ export DEFAULT_PYENV_PYTHON_VERSION=3.11.9
 export FALLBACK_PYENV_PYTHON_VERSION=3.10.7
 # Initialization takes huge portion of time when shell is started
 # Temporary workaround: https://github.com/pyenv/pyenv/issues/2918#issuecomment-1977029534
-pyenv() {
-  eval "$(command pyenv init -)"
-  pyenv "$@"
-}
+export PYENV_ROOT="$HOME/.pyenv"
+if [[ -d "$PYENV_ROOT" ]]; then
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  if command -v pyenv 1>/dev/null 2>&1; then
+    eval "$(pyenv init -)"
+  fi
+fi
 if [[ -d "$HOME/.pyenv" ]]; then
   export PYENV_ROOT="$HOME/.pyenv"
   [[ -d "$PYENV_ROOT/bin" ]] && export PATH="$PYENV_ROOT/bin:$PATH"
@@ -66,21 +71,25 @@ fi
 
 # Tmux on ssh
 if [[ -n "$PS1" ]] && [[ -z "$TMUX" ]] && [[ -n "$SSH_CONNECTION" ]]; then
-  tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
+	if command -v tmux >/dev/null 2>&1; then
+  		tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
+	fi
 fi
 
 # Zinit's installer
 # ---
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+
 if [[ ! -d "${ZINIT_HOME}" ]]; then
   mkdir -p "$(dirname "$ZINIT_HOME")" &&  chmod g-rwX "${ZINIT_HOME}"
   git clone https://github.com/zdharma-continuum/zinit "${ZINIT_HOME}" || \
   print -P "The zinit installation has failed."
 fi
-
-source "${ZINIT_HOME}/zinit.zsh"
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
+if [[ -f "${ZINIT_HOME}/zinit.zsh" ]]; then
+  source "${ZINIT_HOME}/zinit.zsh"
+  autoload -Uz _zinit
+  (( ${+_comps} )) && _comps[zinit]=_zinit
+fi
 # --- End of Zinit's installer
 
 # EZA
