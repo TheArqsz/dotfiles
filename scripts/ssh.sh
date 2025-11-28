@@ -1,27 +1,34 @@
 #!/usr/bin/env zsh
 
-# Ensure the SSH directory exists and has the correct permissions
-if ! [[ -d "$HOME/.ssh" ]]; then
-    mkdir -p "$HOME/.ssh"
-    chmod 700 "$HOME/.ssh"
-    if [[ $? -ne 0 ]]; then
-        echo "Error: Failed to create or set permissions for $HOME/.ssh"
-        exit 1
-    fi
-fi
+SSH_DIR="$HOME/.ssh"
+SSH_CONFIG="$SSH_DIR/config"
+
+mkdir -p "$SSH_DIR" && chmod 700 "$SSH_DIR"
 
 # Ensure the SSH config file exists and has the correct permissions
-if ! [[ -f "$HOME/.ssh/config" ]]; then
-    touch "$HOME/.ssh/config" && chmod 600 "$HOME/.ssh/config"
-    if [[ $? -ne 0 ]]; then
-        echo "Error: Failed to create or set permissions for $HOME/.ssh/config"
-        exit 1
-    fi
+if ! [[ -f "$SSH_CONFIG" ]]; then
+	touch "$SSH_CONFIG" && chmod 600 "$SSH_CONFIG"
+	if [[ $? -ne 0 ]]; then
+		echo "Error: Failed to create or set permissions for $SSH_CONFIG"
+		exit 1
+	fi
 fi
 
-# Check if the configuration already exists before appending
-if ! grep -q "ServerAliveInterval 120" "$HOME/.ssh/config"; then
-    cat <<EOT >> "$HOME/.ssh/config"
+# Ensure the control directory exists
+if ! [[ -d "$SSH_DIR/.control" ]]; then
+	mkdir -p "$SSH_DIR/.control"
+	chmod 700 "$SSH_DIR/.control"
+	if [[ $? -ne 0 ]]; then
+		echo "Error: Failed to create directory $SSH_DIR/.control"
+		exit 1
+	fi
+fi
+
+if ! grep -q "### DOTFILES MANAGED BLOCK ###" "$SSH_CONFIG"; then
+	echo "Adding Dotfiles SSH configuration..."
+	cat <<EOT >>"$SSH_CONFIG"
+
+### DOTFILES MANAGED BLOCK ###
 Host *
     ServerAliveInterval 120
     Compression yes
@@ -30,15 +37,8 @@ Host *
     ControlPath ~/.ssh/.control/.%r.%h.%p.sock
     StrictHostKeyChecking ask
     UserKnownHostsFile ~/.ssh/known_hosts
+### END DOTFILES MANAGED BLOCK ###
 EOT
-fi
-
-# Ensure the control directory exists
-if ! [[ -d "$HOME/.ssh/.control" ]]; then
-    mkdir -p "$HOME/.ssh/.control"
-    chmod 700 "$HOME/.ssh/.control"
-    if [[ $? -ne 0 ]]; then
-        echo "Error: Failed to create directory $HOME/.ssh/.control"
-        exit 1
-    fi
+else
+	echo "Dotfiles SSH configuration already present."
 fi
