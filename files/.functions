@@ -2,317 +2,351 @@
 
 # Enter a running Docker container.
 function dockenter {
- if [[ ! "$1" ]] ; then
-     echo "You must supply a container ID or name."
-     return 0
- fi
+	if [[ ! "$1" ]]; then
+		echo "You must supply a container ID or name."
+		return 0
+	fi
 
- docker exec -it $1 bash
- return 0
+	docker exec -it $1 bash
+	return 0
 }
 
 # Extend $PATH without duplicates
 # https://github.com/denysdovhan/dotfiles/blob/master/home/.zshrc
 function extend_path {
-  [[ -d "$1" ]] || return
+	[[ -d "$1" ]] || return
 
-  if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
-    export PATH="$1:$PATH"
-  fi
-  # Test
+	if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$1"); then
+		export PATH="$1:$PATH"
+	fi
+	# Test
 }
 
 # Hide or show IP addr from Spaceship prompt
 function switch_prompt_ip {
-  local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"
-  [[ -f "$spaceship_custom_config" ]] || (mkdir -p "$(dirname $spaceship_custom_config)" && touch "$spaceship_custom_config" )
+	local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"
+	[[ -f "$spaceship_custom_config" ]] || (mkdir -p "$(dirname $spaceship_custom_config)" && touch "$spaceship_custom_config")
 
-  local sed_backup=""
-  [[ "$(uname)" == "Darwin" ]] && sed_backup="''"
+	local sed_backup=""
+	[[ "$(uname)" == "Darwin" ]] && sed_backup="''"
 
-  if grep -q "SPACESHIP_IP_SHOW=true" "$spaceship_custom_config" >/dev/null; then
-    # Hide IP
-    sed -i$sed_backup 's/^SPACESHIP_IP_SHOW=true/SPACESHIP_IP_SHOW=false/' "$spaceship_custom_config"
-  elif grep -q "SPACESHIP_IP_SHOW=false" "$spaceship_custom_config" >/dev/null; then
-    # Show IP
-    sed -i$sed_backup 's/^SPACESHIP_IP_SHOW=false/SPACESHIP_IP_SHOW=true/' "$spaceship_custom_config"
-  else
-    echo "# Edited by switch_prompt_ip function" >> "$spaceship_custom_config"
-    echo "SPACESHIP_IP_SHOW=false" >> "$spaceship_custom_config"
-  fi
-  # Reload zsh
-  [[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
+	if grep -q "SPACESHIP_IP_SHOW=true" "$spaceship_custom_config" >/dev/null; then
+		# Hide IP
+		sed -i$sed_backup 's/^SPACESHIP_IP_SHOW=true/SPACESHIP_IP_SHOW=false/' "$spaceship_custom_config"
+	elif grep -q "SPACESHIP_IP_SHOW=false" "$spaceship_custom_config" >/dev/null; then
+		# Show IP
+		sed -i$sed_backup 's/^SPACESHIP_IP_SHOW=false/SPACESHIP_IP_SHOW=true/' "$spaceship_custom_config"
+	else
+		echo "# Edited by switch_prompt_ip function" >>"$spaceship_custom_config"
+		echo "SPACESHIP_IP_SHOW=false" >>"$spaceship_custom_config"
+	fi
+	# Reload zsh
+	[[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
 }
 
 # Hide or show hostname from Spaceship prompt
 function switch_prompt_hostname {
-  local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"
-  [[ -f "$spaceship_custom_config" ]] || (mkdir -p "$(dirname $spaceship_custom_config)" && touch "$spaceship_custom_config" )
+	local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"
+	[[ -f "$spaceship_custom_config" ]] || (mkdir -p "$(dirname $spaceship_custom_config)" && touch "$spaceship_custom_config")
 
-  local sed_backup=""
-  [[ "$(uname)" == "Darwin" ]] && sed_backup="''"
+	local sed_backup=""
+	[[ "$(uname)" == "Darwin" ]] && sed_backup="''"
 
-  if grep -q 'SPACESHIP_HOST_SHOW="always"' "$spaceship_custom_config" >/dev/null; then
-    # Hide hostname
-    sed -i$sed_backup 's/^SPACESHIP_HOST_SHOW="always"/SPACESHIP_HOST_SHOW=false/' "$spaceship_custom_config"
-  elif grep -q "SPACESHIP_HOST_SHOW=false" "$spaceship_custom_config" >/dev/null; then
-    # Show IP
-    sed -i$sed_backup 's/^SPACESHIP_HOST_SHOW=false/SPACESHIP_HOST_SHOW="always"/' "$spaceship_custom_config"
-  else
-    echo "# Edited by switch_prompt_hostname function" >> "$spaceship_custom_config"
-    echo "SPACESHIP_HOST_SHOW=false" >> "$spaceship_custom_config"
-  fi
-  # Reload zsh
-  [[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
+	if grep -q 'SPACESHIP_HOST_SHOW="always"' "$spaceship_custom_config" >/dev/null; then
+		# Hide hostname
+		sed -i$sed_backup 's/^SPACESHIP_HOST_SHOW="always"/SPACESHIP_HOST_SHOW=false/' "$spaceship_custom_config"
+	elif grep -q "SPACESHIP_HOST_SHOW=false" "$spaceship_custom_config" >/dev/null; then
+		# Show IP
+		sed -i$sed_backup 's/^SPACESHIP_HOST_SHOW=false/SPACESHIP_HOST_SHOW="always"/' "$spaceship_custom_config"
+	else
+		echo "# Edited by switch_prompt_hostname function" >>"$spaceship_custom_config"
+		echo "SPACESHIP_HOST_SHOW=false" >>"$spaceship_custom_config"
+	fi
+	# Reload zsh
+	[[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
 }
 
 function generate_password {
-    local length=${1:-8}   # Default length is 8 if not provided
-    local use_uppercase=false
-    local use_numbers=false
-    local use_symbols=false
-    local char_space="abcdefghijklmnopqrstuvwxyz"
+	local length=${1:-8} # Default length is 8 if not provided
+	local use_uppercase=false
+	local use_numbers=false
+	local use_symbols=false
+	local char_space="abcdefghijklmnopqrstuvwxyz"
 
-    # Check for help option in any argument
-    for arg in "$@"; do
-        if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
-            echo "Usage: generate_password [LENGTH] [OPTIONS]"
-            echo
-            echo "Generates a random password with a specified length and character options."
-            echo "If LENGTH is not provided, the default length is 8."
-            echo
-            echo "Options:"
-            echo "  -u, --uppercase   Include uppercase letters (A-Z)"
-            echo "  -n, --numbers     Include numbers (0-9)"
-            echo "  -s, --symbols     Include symbols (!@#\$%^&*()_-+=<>?)"
-            echo "  -h, --help        Display this help message"
-            echo
-            echo "Example:"
-            echo "  generate_password 16 -u -n -s"
-            return 0
-        fi
-    done
+	# Check for help option in any argument
+	for arg in "$@"; do
+		if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
+			echo "Usage: generate_password [LENGTH] [OPTIONS]"
+			echo
+			echo "Generates a random password with a specified length and character options."
+			echo "If LENGTH is not provided, the default length is 8."
+			echo
+			echo "Options:"
+			echo "  -u, --uppercase   Include uppercase letters (A-Z)"
+			echo "  -n, --numbers     Include numbers (0-9)"
+			echo "  -s, --symbols     Include symbols (!@#\$%^&*()_-+=<>?)"
+			echo "  -h, --help        Display this help message"
+			echo
+			echo "Example:"
+			echo "  generate_password 16 -u -n -s"
+			return 0
+		fi
+	done
 
-    # Parse optional parameters
-    while [[ $# -gt 1 ]]; do
-        case "$2" in
-            -u|--uppercase) use_uppercase=true ;;
-            -n|--numbers) use_numbers=true ;;
-            -s|--symbols) use_symbols=true ;;
-            *) echo "Unknown option: $2"; return 1 ;;
-        esac
-        shift
-    done
+	# Parse optional parameters
+	while [[ $# -gt 1 ]]; do
+		case "$2" in
+		-u | --uppercase) use_uppercase=true ;;
+		-n | --numbers) use_numbers=true ;;
+		-s | --symbols) use_symbols=true ;;
+		*)
+			echo "Unknown option: $2"
+			return 1
+			;;
+		esac
+		shift
+	done
 
-    # Add uppercase letters if requested
-    if [[ "$use_uppercase" = true ]]; then
-        char_space="${char_space}ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    fi
+	# Add uppercase letters if requested
+	if [[ "$use_uppercase" = true ]]; then
+		char_space="${char_space}ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	fi
 
-    # Add numbers if requested
-    if [[ "$use_numbers" = true ]]; then
-        char_space="${char_space}0123456789"
-    fi
+	# Add numbers if requested
+	if [[ "$use_numbers" = true ]]; then
+		char_space="${char_space}0123456789"
+	fi
 
-    # Add symbols if requested
-    if [[ "$use_symbols" = true ]]; then
-        char_space="${char_space}!@#\$%^&*()_-+=<>?"
-    fi
+	# Add symbols if requested
+	if [[ "$use_symbols" = true ]]; then
+		char_space="${char_space}!@#\$%^&*()_-+=<>?"
+	fi
 
-    # Generate the random password
-    local password=""
-    for ((i=0; i<length; i++)); do
-        local rand_char="${char_space[$((RANDOM % ${#char_space} + 1))]}"
-        password+="$rand_char"
-    done
+	# Generate the random password
+	local password=""
+	for ((i = 0; i < length; i++)); do
+		local rand_char="${char_space[$((RANDOM % ${#char_space} + 1))]}"
+		password+="$rand_char"
+	done
 
-    echo "$password"
+	echo "$password"
 }
 
 function mount_cryptomator {
-    local VAULT_PATH="${1:-/mnt/vault}" 
-    local TARGET_PATH="${2:-/mnt/crypto}" 
+	local VAULT_PATH="${1:-/mnt/vault}"
+	local TARGET_PATH="${2:-/mnt/crypto}"
 
-    # Check for help option in any argument
-    for arg in "$@"; do
-        if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
-            echo "Usage: mount_cryptomator [VAULT_PATH] [TARGET_PATH]"
-            echo
-            echo "Mounts a Cryptomator vault to a specified target directory."
-            echo
-            echo "Arguments:"
-            echo "  VAULT_PATH        Path to the Cryptomator vault directory (e.g., /mnt/vault)"
-            echo "  TARGET_PATH       Local path where the decrypted vault will be mounted (e.g., /mnt/crypto)"
-            echo
-            echo "Options:"
-            echo "  -h, --help        Display this help message"
-            echo
-            echo "Example:"
-            echo "  mount_cryptomator /mnt/vault /mnt/crypto"
-            echo
-            return 0
-        fi
-    done
+	# Check for help option in any argument
+	for arg in "$@"; do
+		if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
+			echo "Usage: mount_cryptomator [VAULT_PATH] [TARGET_PATH]"
+			echo
+			echo "Mounts a Cryptomator vault to a specified target directory."
+			echo
+			echo "Arguments:"
+			echo "  VAULT_PATH        Path to the Cryptomator vault directory (e.g., /mnt/vault)"
+			echo "  TARGET_PATH       Local path where the decrypted vault will be mounted (e.g., /mnt/crypto)"
+			echo
+			echo "Options:"
+			echo "  -h, --help        Display this help message"
+			echo
+			echo "Example:"
+			echo "  mount_cryptomator /mnt/vault /mnt/crypto"
+			echo
+			return 0
+		fi
+	done
 
-    # Validate inputs
-    if [[ -z "$VAULT_PATH" || -z "$TARGET_PATH" ]]; then
-        echo "Error: Both VAULT_PATH and TARGET_PATH are required."
-        echo "  Run 'mount_cryptomator --help' for usage information."
-        return 1
-    fi
+	# Validate inputs
+	if [[ -z "$VAULT_PATH" || -z "$TARGET_PATH" ]]; then
+		echo "Error: Both VAULT_PATH and TARGET_PATH are required."
+		echo "  Run 'mount_cryptomator --help' for usage information."
+		return 1
+	fi
 
-    # Parse optional parameters
-    while [[ $# -gt 2 ]]; do
-        case "$3" in
-            *) echo "Unknown option: $2"; return 1 ;;
-        esac
-        shift
-    done
+	# Parse optional parameters
+	while [[ $# -gt 2 ]]; do
+		case "$3" in
+		*)
+			echo "Unknown option: $2"
+			return 1
+			;;
+		esac
+		shift
+	done
 
-    if alias -s "cryptomator-cli" >/dev/null 2>&1 || command -v "cryptomator-cli" >/dev/null 2>&1; then
-        echo
-        # Prepare the target mount directory
-        echo "## Preparing the target directory for mounting..."
-        sudo mkdir -p "$TARGET_PATH" && sudo chown "$(id -u):$(id -g)" "$TARGET_PATH"
-        if [[ $? -ne 0 ]]; then
-            echo "Error: Failed to prepare the target directory. Check permissions or path validity."
-            return 1
-        fi
+	if alias -s "cryptomator-cli" >/dev/null 2>&1 || command -v "cryptomator-cli" >/dev/null 2>&1; then
+		echo
+		# Prepare the target mount directory
+		echo "## Preparing the target directory for mounting..."
+		sudo mkdir -p "$TARGET_PATH" && sudo chown "$(id -u):$(id -g)" "$TARGET_PATH"
+		if [[ $? -ne 0 ]]; then
+			echo "Error: Failed to prepare the target directory. Check permissions or path validity."
+			return 1
+		fi
 
-        echo "## Unlocking the vault..."
-        echo "  You may need to provide your vault's password"
-        cryptomator-cli unlock \
-          --password:stdin \
-          --mounter=org.cryptomator.frontend.fuse.mount.LinuxFuseMountProvider \
-          --mountPoint="$TARGET_PATH" \
-          "$VAULT_PATH"
-    else
-        echo "Cryptomator's CLI is not installed"
-        echo "Install it using:"
-        echo "  bootstrap -t cryptomator-cli"
-        exit 1
-    fi
+		echo "## Unlocking the vault..."
+		echo "  You may need to provide your vault's password"
+		cryptomator-cli unlock \
+			--password:stdin \
+			--mounter=org.cryptomator.frontend.fuse.mount.LinuxFuseMountProvider \
+			--mountPoint="$TARGET_PATH" \
+			"$VAULT_PATH"
+	else
+		echo "Cryptomator's CLI is not installed"
+		echo "Install it using:"
+		echo "  bootstrap -t cryptomator-cli"
+		exit 1
+	fi
 }
 
 function mount_remote_vault {
-    local REMOTE_PATH="${1:-//localhost/share}" 
-    local TARGET_PATH="${2:-/mnt/smbshare}" 
-    local smb_username="user"
-    local vault_dir="Data"
-    local cryptomator_mount="/mnt/crypto"
+	local REMOTE_PATH="${1:-//localhost/share}"
+	local TARGET_PATH="${2:-/mnt/smbshare}"
+	local smb_username="user"
+	local vault_dir="Data"
+	local cryptomator_mount="/mnt/crypto"
 
-    # Check for help option in any argument
-    for arg in "$@"; do
-        if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
-            echo "Usage: mount_remote_vault [REMOTE_PATH] [TARGET_PATH] [OPTIONS]"
-            echo
-            echo "Mounts a remote Cryptomator vault hosted in an SMB share."
-            echo
-            echo "Arguments:"
-            echo "  REMOTE_PATH       Path to the remote SMB share (e.g., //localhost/share)"
-            echo "  TARGET_PATH       Local mount point for the SMB share (e.g., /mnt/smbshare)"
-            echo
-            echo "Options:"
-            echo "  -u, --username    SMB username for authentication (default: 'user')"
-            echo "  -v, --vault_dir   Directory name of the vault inside the SMB share (default: 'Data')"
-            echo "  -c, --cryptomator_mount"
-            echo "                    Local path to mount the decrypted Cryptomator vault (default: '/mnt/crypto')"
-            echo "  -h, --help        Display this help message and exit"
-            echo
-            echo "Example:"
-            echo "  mount_remote_vault //localhost/share /mnt/crypto -u myuser -v MyVault -c /mnt/decrypted"
-            echo
-            return 0
-        fi
-    done
+	# Check for help option in any argument
+	for arg in "$@"; do
+		if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
+			echo "Usage: mount_remote_vault [REMOTE_PATH] [TARGET_PATH] [OPTIONS]"
+			echo
+			echo "Mounts a remote Cryptomator vault hosted in an SMB share."
+			echo
+			echo "Arguments:"
+			echo "  REMOTE_PATH       Path to the remote SMB share (e.g., //localhost/share)"
+			echo "  TARGET_PATH       Local mount point for the SMB share (e.g., /mnt/smbshare)"
+			echo
+			echo "Options:"
+			echo "  -u, --username    SMB username for authentication (default: 'user')"
+			echo "  -v, --vault_dir   Directory name of the vault inside the SMB share (default: 'Data')"
+			echo "  -c, --cryptomator_mount"
+			echo "                    Local path to mount the decrypted Cryptomator vault (default: '/mnt/crypto')"
+			echo "  -h, --help        Display this help message and exit"
+			echo
+			echo "Example:"
+			echo "  mount_remote_vault //localhost/share /mnt/crypto -u myuser -v MyVault -c /mnt/decrypted"
+			echo
+			return 0
+		fi
+	done
 
-    # Parse optional parameters
-    while [[ $# -gt 2 ]]; do
-        case "$3" in
-            -u|--username) shift; smb_username=$3;;
-            -v|--vault_dir) shift; vault_dir=$3;;
-            -c|--cryptomator_mount) shift; cryptomator_mount=$3;;
-            *) echo "Unknown option: $3"; return 1 ;;
-        esac
-        shift
-    done
+	# Parse optional parameters
+	while [[ $# -gt 2 ]]; do
+		case "$3" in
+		-u | --username)
+			shift
+			smb_username=$3
+			;;
+		-v | --vault_dir)
+			shift
+			vault_dir=$3
+			;;
+		-c | --cryptomator_mount)
+			shift
+			cryptomator_mount=$3
+			;;
+		*)
+			echo "Unknown option: $3"
+			return 1
+			;;
+		esac
+		shift
+	done
 
-    if alias -s "cryptomator-cli" >/dev/null 2>&1 || command -v "cryptomator-cli" >/dev/null 2>&1; then
-        echo
-        echo "This will be run in the foreground."
-        while true; do
-            echo -n "  Do you want to continue? (y/n): "
-            read response
-            case "$response" in
-                [Yy]* ) break ;;
-                [Nn]* ) echo "Exiting."; return 1 ;;
-                * ) echo "  Invalid input. Please enter y/yes or n/no." ;;
-            esac
-        done
+	if alias -s "cryptomator-cli" >/dev/null 2>&1 || command -v "cryptomator-cli" >/dev/null 2>&1; then
+		echo
+		echo "This will be run in the foreground."
+		while true; do
+			echo -n "  Do you want to continue? (y/n): "
+			read response
+			case "$response" in
+			[Yy]*) break ;;
+			[Nn]*)
+				echo "Exiting."
+				return 1
+				;;
+			*) echo "  Invalid input. Please enter y/yes or n/no." ;;
+			esac
+		done
 
-        echo
-        echo "## Mounting the remote Cryptomator's Vault hosted in the SMB Share"
-        echo "  You may need to type in your sudo password"
-        sudo -v
+		echo
+		echo "## Mounting the remote Cryptomator's Vault hosted in the SMB Share"
+		echo "  You may need to type in your sudo password"
+		sudo -v
 
-        # Prepare the target directory
-        sudo mkdir -p "$TARGET_PATH" && \
-        sudo chown $(id -u):$(id -g) "$TARGET_PATH" 
+		# Prepare the target directory
+		sudo mkdir -p "$TARGET_PATH" &&
+			sudo chown $(id -u):$(id -g) "$TARGET_PATH"
 
-        # Install required dependencies
-        echo "## Installing CIFS dependencies..."
-        sudo apt-get update -yqq && \
-        sudo apt-get install --show-progress -yqq cifs-utils
+		# Install required dependencies
+		echo "## Installing CIFS dependencies..."
+		sudo apt-get update -yqq &&
+			sudo apt-get install --show-progress -yqq cifs-utils
 
-        # Mount the SMB share
-        echo "## Mounting the SMB share from $REMOTE_PATH..."
-        sudo umount "$TARGET_PATH" 2>/dev/null
+		# Mount the SMB share
+		echo "## Mounting the SMB share from $REMOTE_PATH..."
+		sudo umount "$TARGET_PATH" 2>/dev/null
 
-        if sudo mount -o username="$smb_username",uid="$(id -u)",rw -t cifs "$REMOTE_PATH" "$TARGET_PATH"; then
-            echo "  Mounted SMB share successfully!"
-            echo "## Passing the arguments to the cryptomator handler..."
-            if command -v mount_cryptomator >/dev/null 2>&1; then
-                mount_cryptomator "$TARGET_PATH/$vault_dir" "$cryptomator_mount"
-            else
-                echo "Error: mount_cryptomator command not found."
-                return 1
-            fi
-        else
-            echo "Error: Failed to mount the SMB share. Please check your inputs and try again."
-            return 1
-        fi
+		if sudo mount -o username="$smb_username",uid="$(id -u)",rw -t cifs "$REMOTE_PATH" "$TARGET_PATH"; then
+			echo "  Mounted SMB share successfully!"
+			echo "## Passing the arguments to the cryptomator handler..."
+			if command -v mount_cryptomator >/dev/null 2>&1; then
+				mount_cryptomator "$TARGET_PATH/$vault_dir" "$cryptomator_mount"
+			else
+				echo "Error: mount_cryptomator command not found."
+				return 1
+			fi
+		else
+			echo "Error: Failed to mount the SMB share. Please check your inputs and try again."
+			return 1
+		fi
 
-        # sudo mount -o username=$smb_username,uid=$(id -u),rw -t cifs "$REMOTE_PATH" "$TARGET_PATH" && \
-        # mount_cryptomator "$TARGET_PATH/$vault_dir" "$cryptomator_mount"        
-    else
-        echo "Cryptomator's CLI is not installed"
-        echo "Install it using:"
-        echo "  bootstrap -t cryptomator-cli"
-        exit 1
-    fi
+		# sudo mount -o username=$smb_username,uid=$(id -u),rw -t cifs "$REMOTE_PATH" "$TARGET_PATH" && \
+		# mount_cryptomator "$TARGET_PATH/$vault_dir" "$cryptomator_mount"
+	else
+		echo "Cryptomator's CLI is not installed"
+		echo "Install it using:"
+		echo "  bootstrap -t cryptomator-cli"
+		exit 1
+	fi
 }
 
 function convert_jwt {
-    local jwt="$1"
-    local header=$(echo "$jwt" | cut -d '.' -f 1)
-    local payload=$(echo "$jwt" | cut -d '.' -f 2)
-    local signature=$(echo "$jwt" | cut -d '.' -f 3)
+	local jwt="$1"
+	local header=$(echo "$jwt" | cut -d '.' -f 1)
+	local payload=$(echo "$jwt" | cut -d '.' -f 2)
+	local signature=$(echo "$jwt" | cut -d '.' -f 3)
 
-    # Decode the header and payload
-    local decoded_header=$(echo "$header" | base64 --decode 2>/dev/null)
-    local decoded_payload=$(echo "$payload" | base64 --decode 2>/dev/null)
+	# Decode the header and payload
+	local decoded_header=$(echo "$header" | base64 --decode 2>/dev/null)
+	local decoded_payload=$(echo "$payload" | base64 --decode 2>/dev/null)
 
-    # Check if decoding was successful
-    if [[ $? -ne 0 ]]; then
-        echo "Error: Invalid JWT format."
-        return 1
-    fi
+	# Check if decoding was successful
+	if [[ $? -ne 0 ]]; then
+		echo "Error: Invalid JWT format."
+		return 1
+	fi
 
-    # Print the decoded header and payload
-    echo "Decoded Header:"
-    echo "$decoded_header"
-    echo
-    echo "Decoded Payload:"
-    echo "$decoded_payload"
-    echo
+	# Print the decoded header and payload
+	echo "Decoded Header:"
+	echo "$decoded_header"
+	echo
+	echo "Decoded Payload:"
+	echo "$decoded_payload"
+	echo
+}
+
+function detach_tmux {
+	if [ -z "$TMUX" ]; then
+		echo "Not a tmux session."
+		return 1
+	fi
+
+	if [ -n "$SSH_CONNECTION" ]; then
+		tmux detach -E 'kill -9 $PPID'
+	else
+		tmux detach
+	fi
 }
