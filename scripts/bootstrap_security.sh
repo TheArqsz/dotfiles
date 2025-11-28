@@ -4,7 +4,7 @@
 # Copyright 2025 TheArqsz
 
 # Check if a command exists
-_cmd_exists() { 
+_cmd_exists() {
     alias -s "$1" >/dev/null 2>&1 || command -v "$1" >/dev/null 2>&1
 }
 
@@ -49,9 +49,9 @@ Options:
 
 # Security extensions for VSCode
 vscode_sec_extensions=(
-    Surendrajat.apklab                          # APKLab
-    tintinweb.vscode-decompiler                 # Decompiler
-    snyk-security.snyk-vulnerability-scanner    # Snyk Security
+    Surendrajat.apklab                       # APKLab
+    tintinweb.vscode-decompiler              # Decompiler
+    snyk-security.snyk-vulnerability-scanner # Snyk Security
 )
 
 security_bootstrap_code-extensions() {
@@ -74,7 +74,7 @@ security_bootstrap_code-extensions() {
                 }
         done
     else
-        step "VSCode doesn't exist - skipping extensions installation"  
+        step "VSCode doesn't exist - skipping extensions installation"
     fi
 }
 
@@ -110,10 +110,10 @@ security_bootstrap_massdns() {
         # https://github.com/blechschmidt/massdns#compilation
         git clone https://github.com/blechschmidt/massdns $_clone_dir
         cd $_clone_dir
-        make && \
-        sudo make install && \
-        cd "$_current_dir" && \
-        rm -rf $_clone_dir
+        make &&
+            sudo make install &&
+            cd "$_current_dir" &&
+            rm -rf $_clone_dir
     elif _cmd_exists massdns; then
         step "massdns is already installed"
     else
@@ -133,7 +133,7 @@ security_bootstrap_projectdiscovery() {
             step "Updating pdtm"
             pdtm -nc -dc -up
         fi
-        
+
         local -a _pdtm_tools_to_install=(
             subfinder
             tldfinder
@@ -145,6 +145,7 @@ security_bootstrap_projectdiscovery() {
             dnsx
             asnmap
             chaos-client
+            alterx
         )
 
         for tool in "${_pdtm_tools_to_install[@]}"; do
@@ -162,17 +163,17 @@ security_bootstrap_projectdiscovery() {
                     security_bootstrap_massdns
                     _local_reload
                 fi
-                pdtm -dc -nc -duc -i $tool 
+                pdtm -dc -nc -duc -i $tool
             else
                 step "$tool already installed - updating"
                 pdtm -dc -nc -duc -u $tool 2>/dev/null
             fi
         done
-         
+
         # Update templates
         _local_reload
         if _cmd_exists nuclei; then
-            nuclei -nc -nm -ut 
+            nuclei -nc -nm -ut
         fi
     else
         step "Golang is not installed - skipping"
@@ -207,7 +208,7 @@ security_bootstrap_gitlab-subdomains() {
 
 security_bootstrap_check_mdi() {
     echo
-    if ! _cmd_exists python3;  then 
+    if ! _cmd_exists python3; then
         step "Installing check_mdi dependencies"
         sudo apt-get install --show-progress -yqq python3 python3-venv
     fi
@@ -247,32 +248,32 @@ security_bootstrap_wordlists() {
         if [[ "$choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
             echo "  > OneListForAll"
             git clone https://github.com/six2dez/OneListForAll /opt/Tools/wordlists/OneListForAll || {
-                echo "OneListForAll repository is already cloned" && \
-                cd /opt/Tools/wordlists/OneListForAll && \
-                git fetch --all && \
-                git reset --hard HEAD && \
-                git pull
+                echo "OneListForAll repository is already cloned" &&
+                    cd /opt/Tools/wordlists/OneListForAll &&
+                    git fetch --all &&
+                    git reset --hard HEAD &&
+                    git pull
             }
         else
             echo "OneListForAll skipped."
         fi
-        
+
         choice=''
         echo -n "Do you want to install SecLists? (y/n): "
         read choice
         if [[ "$choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
             echo "  > SecLists"
             git clone https://github.com/danielmiessler/SecLists /opt/Tools/wordlists/SecLists || {
-                echo "SecLists repository is already cloned" && \
-                cd /opt/Tools/wordlists/SecLists && \
-                git fetch --all && \
-                git reset --hard HEAD && \
-                git pull
+                echo "SecLists repository is already cloned" &&
+                    cd /opt/Tools/wordlists/SecLists &&
+                    git fetch --all &&
+                    git reset --hard HEAD &&
+                    git pull
             }
         else
             echo "SecLists skipped."
         fi
-        
+
         choice=''
         echo -n "Do you want to install assetnote wordlists? (y/n): "
         read choice
@@ -280,32 +281,32 @@ security_bootstrap_wordlists() {
             echo "  > assetnote"
             sudo apt-get install jq -yqq --show-progress
             git clone https://github.com/assetnote/wordlists /opt/Tools/wordlists/assetnote || {
-                echo "assetnote wordlists repository is already cloned" && \
-                cd /opt/Tools/wordlists/assetnote && \
-                git fetch --all && \
-                git reset --hard HEAD && \
-                git pull
+                echo "assetnote wordlists repository is already cloned" &&
+                    cd /opt/Tools/wordlists/assetnote &&
+                    git fetch --all &&
+                    git reset --hard HEAD &&
+                    git pull
             }
             mkdir -p /opt/Tools/wordlists/assetnote/lists/{automated,technologies}
-            cat /opt/Tools/wordlists/assetnote/data/automated.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 | \
+            cat /opt/Tools/wordlists/assetnote/data/automated.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 |
                 xargs -I {} wget -nH -e robots=off -q --show-progress -nc -P /opt/Tools/wordlists/assetnote/lists/automated {}
-            cat /opt/Tools/wordlists/assetnote/data/technologies.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 | \
+            cat /opt/Tools/wordlists/assetnote/data/technologies.json | jq -r '.[] | .[].Download' | cut -d"'" -f2 |
                 xargs -I {} wget -nH -e robots=off -q --show-progress -nc -P /opt/Tools/wordlists/assetnote/lists/technologies {}
         else
             echo "assetnote wordlists skipped."
         fi
-        
+
         choice=''
         echo -n "Do you want to install n0kovo DNS wordlists? (y/n): "
         read choice
         if [[ "$choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
             echo "  > n0kovo DNS"
             git clone https://github.com/n0kovo/n0kovo_subdomains /opt/Tools/wordlists/n0kovo_subdomains || {
-                echo "n0kovo DNS repository is already cloned" && \
-                cd /opt/Tools/wordlists/n0kovo_subdomains && \
-                git fetch --all && \
-                git reset --hard HEAD && \
-                git pull
+                echo "n0kovo DNS repository is already cloned" &&
+                    cd /opt/Tools/wordlists/n0kovo_subdomains &&
+                    git fetch --all &&
+                    git reset --hard HEAD &&
+                    git pull
             }
         else
             echo "n0kovo DNS skipped."
@@ -319,10 +320,25 @@ security_bootstrap_wordlists() {
 
 security_bootstrap_nomore403() {
     echo
-    if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+    if ! _cmd_exists nomore403 && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
         step "Installing nomore403"
         go install -v github.com/devploit/nomore403@latest
         step "nomore403 tool is installed"
+    elif _cmd_exists nomore403; then
+        step "nomore403 is already installed"
+    else
+        step "Golang is not installed - skipping"
+    fi
+}
+
+security_bootstrap_ffuf() {
+    echo
+    if ! _cmd_exists ffuf && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+        step "Installing ffuf"
+        go install -v github.com/ffuf/ffuf/v2@latest
+        step "ffuf tool is installed"
+    elif _cmd_exists ffuf; then
+        step "ffuf is already installed"
     else
         step "Golang is not installed - skipping"
     fi
@@ -439,7 +455,7 @@ security_bootstrap_trufflehog() {
             echo "trufflehog repository is already cloned"
         }
         cd /opt/Tools/trufflehog
-        
+
         step "Building trufflehog"
         go install -v
         step "trufflehog is installed"
@@ -620,11 +636,11 @@ security_bootstrap_crt.sh() {
     if ! _cmd_exists crt.sh; then
         step "Installing the fork of crt.sh"
         git clone https://github.com/TheArqsz/crt.sh /opt/Tools/crt.sh 2>/dev/null || {
-            echo "crt.sh repository is already cloned" && \
-            cd /opt/Tools/crt.sh && \
-            git fetch --all && \
-            git reset --hard HEAD && \
-            git pull
+            echo "crt.sh repository is already cloned" &&
+                cd /opt/Tools/crt.sh &&
+                git fetch --all &&
+                git reset --hard HEAD &&
+                git pull
         }
         chmod +x /opt/Tools/crt.sh/crt_v2.sh
         if [ ! -f /usr/local/bin/crt.sh ]; then
@@ -635,6 +651,20 @@ security_bootstrap_crt.sh() {
         fi
     else
         step "crt.sh is already installed"
+    fi
+}
+
+security_bootstrap_domainspotter() {
+    # https://github.com/TheArqsz/domainspotter
+    echo
+    if ! _cmd_exists domainspotter && [[ -f "/etc/debian_version" ]]; then
+        step "Installing domainspotter"
+        sudo apt-get install --show-progress -yqq jq curl
+        sudo curl -o /usr/local/bin/domainspotter https://raw.githubusercontent.com/TheArqsz/domainspotter/main/domainspotter.sh
+        sudo chmod +x /usr/local/bin/domainspotter
+        step "domainspotter tool is installed"
+    elif _cmd_exists domainspotter; then
+        step "domainspotter is already installed"
     fi
 }
 
@@ -737,10 +767,10 @@ local EXCLUDED_PACKAGES='TBD'
 if [[ "$list_tools" == true ]]; then
     all_tools=$(typeset -f | \grep -e "^security\_bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f3 | cut -d' ' -f1)
     all_gui_tools=$(typeset -f | \grep -e "^security\_gui\_setup\_" | cut -d'_' -f4,5 | cut -d' ' -f1)
-    echo '--- CLI ---' 
+    echo '--- CLI ---'
     echo $all_tools | sort
     echo
-    echo '--- GUI ---' 
+    echo '--- GUI ---'
     echo $all_gui_tools | sort
     echo
     echo '--- GROUPS ---'
@@ -767,10 +797,9 @@ fi
 local EXCLUDED_PACKAGES='allgui'
 
 # User passed the CLI tools as a coma-separated list
-IFS=',' read -r -A few_tools_to_bootstrap <<< "$tool_to_bootstrap"
+IFS=',' read -r -A few_tools_to_bootstrap <<<"$tool_to_bootstrap"
 
-for tool_to_bootstrap in "${few_tools_to_bootstrap[@]}"
-do
+for tool_to_bootstrap in "${few_tools_to_bootstrap[@]}"; do
     if [[ -n "${tool_to_bootstrap}" ]]; then
         if [[ "$tool_to_bootstrap" != "all" ]] && type security_bootstrap_"$tool_to_bootstrap" | grep -q "not found"; then
             step "Bootstrap for $tool_to_bootstrap not implemented - exiting"
@@ -791,9 +820,8 @@ do
 done
 
 # User passed the GUI tools as a coma-separated list
-IFS=',' read -r -A gui_tools_to_bootstrap <<< "$gui_tool_to_bootstrap"
-for gui_tool_to_bootstrap in "${gui_tools_to_bootstrap[@]}"
-do
+IFS=',' read -r -A gui_tools_to_bootstrap <<<"$gui_tool_to_bootstrap"
+for gui_tool_to_bootstrap in "${gui_tools_to_bootstrap[@]}"; do
     if [[ -n "${gui_tool_to_bootstrap}" ]]; then
         if type security_gui_setup_"$gui_tool_to_bootstrap" | grep -q "not found"; then
             step "GUI bootstrap for $gui_tool_to_bootstrap not implemented - exiting"
