@@ -865,10 +865,10 @@ done
 IFS=',' read -r -A gui_tools_to_bootstrap <<<"$gui_tool_to_bootstrap"
 for gui_tool_to_bootstrap in "${gui_tools_to_bootstrap[@]}"; do
 	if [[ -n "${gui_tool_to_bootstrap}" ]]; then
-		if type security_gui_setup_"$gui_tool_to_bootstrap" | grep -q "not found"; then
+		if [[ "$gui_tool_to_bootstrap" != "gui" ]] && type security_gui_setup_"$gui_tool_to_bootstrap" | grep -q "not found"; then
 			step "GUI bootstrap for $gui_tool_to_bootstrap not implemented - exiting"
 			exit 1
-		elif [[ "$tool_to_bootstrap" == "gui" ]]; then
+		elif [[ "$gui_tool_to_bootstrap" == "gui" ]]; then
 			all_tools=$(typeset -f | \grep -e "^security\_gui\_setup" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f4 | cut -d' ' -f1)
 			all_tools_sorted=$(echo $all_tools | sort)
 			IFS=$'\n' all_tools_sorted=($(sort <<<"$all_tools"))
