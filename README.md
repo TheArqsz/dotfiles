@@ -64,11 +64,14 @@ The main plugin manager for my zsh shell is [zinit](https://github.com/zdharma-c
 
 I am using some Zinit's native plugins but also some from OhMyZSH (with prefix `OMZP` or `OMZL`):
 
+- OMZL::git.zsh
+- OMZP::git
 - zsh-hooks/zsh-hooks 
 - zsh-users/zsh-autosuggestions 
 - zsh-users/zsh-completions
+- zsh-users/zsh-history-substring-search
+- zdharma-continuum/fast-syntax-highlighting (Linux only)
 - Aloxaf/fzf-tab
-- OMZL::clipboard.zsh 
 - OMZP::copyfile 
 - OMZP::systemd 
 - OMZP::pip 
@@ -146,6 +149,13 @@ For my zsh to be as noninteractive to be set up as possible I made it to install
 
 - If [c4p](https://github.com/TheArqsz/containers4pentesters) is installed, set proper envs
 
+---
+
+- `tldr` auto-update is disabled (updated manually via bootstrap instead)
+- If `pdtm` is installed, its Go bin dir is added to `$PATH`
+- `nvm` is loaded lazily (only on first use of `node`/`npm`/etc.) to keep shell startup fast
+- `safe-chain` node-ecosystem wrapping is sourced for `npm`/`npx`/`yarn`/`pnpm`/etc.
+
 ### Aliases
 
 > ls -> eza
@@ -155,13 +165,18 @@ For my zsh to be as noninteractive to be set up as possible I made it to install
 - `la`=`ls -lhAF`
 - `tree`=`ls --tree`
 
-> fd
+> If micro is installed instead of nano
 
-- `find`=`fd`
+- `nano`=`micro`
 
-> If fdfind is installed instead if plain fd
+> If fdfind is installed instead of plain fd
 
 - `fd`=`fdfind`
+
+> If BurpSuitePro is installed
+
+- `burp`=`BurpSuitePro`
+- `burpsuite`=`BurpSuitePro`
 
 > grep: color and show the line number for each match
 
@@ -199,49 +214,67 @@ This repository includes several useful functions to enhance the workflow. Below
 
 - **mount_remote_vault**: Mount a remote Cryptomator vault hosted in an SMB share.
 
+- **clipcopy** / **clippaste**: Cross-platform clipboard copy/paste (also used by the `copyfile` OMZ plugin), replacing the `OMZL::clipboard.zsh` OMZ library.
+
+- **convert_jwt**: Decode a JWT's header and payload.
+
+- **detach_tmux**: Detach from the current tmux session (kills the SSH session too, if applicable).
+
 ## Bootstraping
 
 To automate the installation of various tools, several functions have been implemented. These can be accessed using the `bootstrap`, `bootstrap.sh`, or `btsp` aliases:
 
 ```zsh
 $ bootstrap -h
-Usage: bootstrap -t tool...
+Usage: bootstrap [options]
+
 Bootstrap OS and/or tools
 
-Optional arguments:
+Options:
     -t, --tool             Bootstrap specific tool (default: none, can be set to "all" or "gui")
-        all:    Install all CLI tools
-        gui:    Install additional GUI-based tools (Signal, Brave, Burp Suite Pro)
-
-        tool1,tool2:    Multiple tools can be specified, separated by a comma
+                           all: Install all CLI tools
+                           gui: Install additional GUI-based tools (e.g. Signal, Brave, Burp Suite Pro)
+                           tool1,tool2: Specify multiple tools separated by a comma
+    --gui-tool             Install specific GUI tool
 
     -l, --list-tools       List tools to be bootstrapped
     -s, --system           Bootstrap system
-    -v, --verbose          Set verbose mode
-
+    -v, --verbose          Enable verbose mode
     --code-extensions      Additional VSCode extensions to install
     --list-default-ext     List default VSCode extensions
+
+    security               Run the security module
+
+    -h, --help             Show this help message and exit
 ```
 
-Current list of tools:
+Current list of CLI tools (`bootstrap -t <tool>`):
+
+```zsh
+brew
+code
+cryptomator-cli
+docker
+eza
+fdfind
+fzf
+golang
+micro
+pyenv
+tldr
+tmux
+updog
+```
+
+Current list of GUI tools (`bootstrap --gui-tool <tool>`, or all via the `gui` category):
 
 ```zsh
 brave
-burp
-flameshot
-signal_desktop
-docker
-updog
-golang
-fzf
-pyenv
-fdfind
-eza
-tmux
-brew
-obsidian
+chrome
 copyq
-cryptomator-cli
+flameshot
+obsidian
+signal_desktop
 ```
 
 Additionally, three categories have been prepared:
@@ -255,24 +288,26 @@ gui
 Each of the given tools or categories can be installed with:
 
 ```zsh
-$ bootstrap -t copyq
+$ bootstrap -t eza
 ```
 
 or 
 
 ```zsh
-$ bootstrap -t copyq,docker,eza
+$ bootstrap -t docker,eza,fzf
+```
+
+A single GUI tool can be installed with:
+
+```zsh
+$ bootstrap --gui-tool copyq
 ```
 
 ### Categories
 
-- `all` - Installs all the basic tools listed above
+- `all` - Installs all the CLI tools listed above
 - `c4p` - Installs the [c4p](https://github.com/TheArqsz/containers4pentesters) project
-- `gui` - Installs GUI tools, such as:
-    - `brave`
-    - `burp suite`
-    - `signal`
-    - `flameshot`
+- `gui` - Installs all the GUI tools listed above (`brave`, `chrome`, `copyq`, `flameshot`, `obsidian`, `signal_desktop`)
 
 ### Additional information on tools
 
