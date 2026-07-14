@@ -3,15 +3,7 @@
 #
 # Copyright 2025 TheArqsz
 
-# Check if a command exists
-_cmd_exists() {
-	alias -s "$1" >/dev/null 2>&1 || command -v "$1" >/dev/null 2>&1
-}
-
-# Print a step message
-step() {
-	echo -e "## ${*}"
-}
+source "$DOTFILES/scripts/_bootstrap_lib.sh"
 
 # Local reload, separate from the global reload
 _local_reload() {
