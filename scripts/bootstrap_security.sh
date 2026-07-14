@@ -355,9 +355,9 @@ security_bootstrap_nomore403() {
 	if [[ -f "/etc/debian_version" ]]; then
 		NOMORE403_LATEST_VERSION=$(curl -sSL https://github.com/devploit/nomore403/releases | \grep -E 'devploit/nomore403/tree' | awk -F'tree/' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
 		if _cmd_exists nomore403; then
-			sha256_latest="$(curl -# -sSL "https:/github.com/devploit/nomore403/releases/download/$NOMORE403_LATEST_VERSION/checksums.txt" -o - | \grep nomore403_linux_amd64 | awk '{print $1}')"
-			sha256_installed="$(sha1sum "$(which nomore403)" | awk '{print $1}')"
-			if [ "$md5_1" = "$md5_2" ]; then
+			sha256_latest="$(curl -# -sSL "https://github.com/devploit/nomore403/releases/download/$NOMORE403_LATEST_VERSION/checksums.txt" -o - | \grep nomore403_linux_amd64 | awk '{print $1}')"
+			sha256_installed="$(sha256sum "$(which nomore403)" | awk '{print $1}')"
+			if [ "$sha256_installed" = "$sha256_latest" ]; then
 				step "Skipping update"
 				return
 			else
@@ -366,7 +366,7 @@ security_bootstrap_nomore403() {
 		else
 			step "Installing nomore403"
 		fi
-		curl -# -SL "https:/github.com/devploit/nomore403/releases/download/$NOMORE403_LATEST_VERSION/nomore403_linux_amd64" --output /tmp/nomore403_${NOMORE403_LATEST_VERSION}
+		curl -# -SL "https://github.com/devploit/nomore403/releases/download/$NOMORE403_LATEST_VERSION/nomore403_linux_amd64" --output /tmp/nomore403_${NOMORE403_LATEST_VERSION}
 		sudo mv /tmp/nomore403_${NOMORE403_LATEST_VERSION} /usr/local/bin/nomore403
 		sudo chmod +x /usr/local/bin/nomore403
 		step "nomore403 installed"
