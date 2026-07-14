@@ -132,7 +132,7 @@ gui_setup_flameshot() {
 	echo
 	if ! _cmd_exists flameshot && [[ -f "/etc/debian_version" ]]; then
 		step "Installing flameshot"
-		FLAMESHOT_LATEST_VERSION=$(curl -sL https://github.com/flameshot-org/flameshot/releases | \grep -E 'flameshot/tree/v[0-9]+' | \grep -v '.rc' | awk -F'/v' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+		FLAMESHOT_LATEST_VERSION=$(_gh_latest_version flameshot-org/flameshot) || return 1
 		step "  Downloading official release"
 		curl -# -SL "https://github.com/flameshot-org/flameshot/releases/download/v$FLAMESHOT_LATEST_VERSION/flameshot-${FLAMESHOT_LATEST_VERSION}-1.$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')-$(lsb_release -r -s).$(dpkg --print-architecture).deb" --output flameshot.deb
 		sudo dpkg -i flameshot.deb
@@ -145,11 +145,11 @@ gui_setup_flameshot() {
 
 gui_setup_obsidian() {
 	echo
-	OBSIDIAN_LATEST_VERSION=$(curl -sL https://github.com/obsidianmd/obsidian-releases/releases | \grep -P 'obsidian-releases/tree/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}"' | awk -F'tree/v' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
 	if _cmd_exists obsidian; then
 		step "Obsidian is already installed"
 		return
 	fi
+	OBSIDIAN_LATEST_VERSION=$(_gh_latest_version obsidianmd/obsidian-releases) || return 1
 	if [[ -f "/etc/debian_version" ]]; then
 		step "Installing Obsidian on Debian-based system"
 		step "  Installing version $OBSIDIAN_LATEST_VERSION"
@@ -459,7 +459,7 @@ bootstrap_fdfind() {
 	echo
 	if ! _cmd_exists fdfind && ! _cmd_exists fd; then
 		step "Installing fdfind"
-		FD_LATEST_VERSION=$(curl -sL https://github.com/sharkdp/fd/releases | \grep -E 'fd/tree/v[0-9]+' | awk -F'/v' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+		FD_LATEST_VERSION=$(_gh_latest_version sharkdp/fd) || return 1
 		step "  Downloading official release"
 		curl -# -SL "https://github.com/sharkdp/fd/releases/download/v$FD_LATEST_VERSION/fd-musl_${FD_LATEST_VERSION}_$(dpkg --print-architecture).deb" --output fd.deb
 		sudo dpkg -i fd.deb &&
@@ -489,7 +489,7 @@ bootstrap_eza() {
 
 bootstrap_tmux() {
 	echo
-	TMUX_LATEST_VERSION=$(curl -sL https://github.com/tmux/tmux/releases | \grep -E 'tmux/tree/' | awk -F'tree/' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+	TMUX_LATEST_VERSION=$(_gh_latest_version tmux/tmux) || return 1
 	if _cmd_exists tmux; then
 		if [[ "tmux $TMUX_LATEST_VERSION" == "$(tmux -V)" ]]; then
 			step "Tmux is already installed and updated to the latest version"
@@ -569,7 +569,7 @@ bootstrap_c4p() {
 
 bootstrap_cryptomator-cli() {
 	echo
-	CRYPTO_CLI_LATEST_VERSION=$(curl -sL https://github.com/cryptomator/cli/releases | \grep -P 'cryptomator/cli/tree/[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}"' | awk -F'tree/' '{print $2}' | awk -F'" ' '{print $1}' | head -n1)
+	CRYPTO_CLI_LATEST_VERSION=$(_gh_latest_version cryptomator/cli) || return 1
 	# Debian-based system
 	if [[ -f "/etc/debian_version" ]]; then
 		step "Installing Cryptomator's CLI on Debian-based system"
@@ -602,7 +602,7 @@ bootstrap_cryptomator-cli() {
 
 bootstrap_micro() {
 	echo
-	MICRO_LATEST_VERSION=$(curl -sL https://github.com/zyedidia/micro/releases | \grep -E 'micro/tree/' | awk -F'tree/v' '{print $2}' | awk -F'" ' '{print $1}' | awk 'NF' | head -n1)
+	MICRO_LATEST_VERSION=$(_gh_latest_version zyedidia/micro) || return 1
 	if _cmd_exists micro; then
 		if micro -version | grep -q "Version: $MICRO_LATEST_VERSION"; then
 			step "Micro is already installed and updated to the latest version"
