@@ -303,7 +303,11 @@ if ! (( $+commands[fdfind] )) && ! (( $+commands[fd] )); then
   echo "  Follow instructions at https://github.com/sharkdp/fd?tab=readme-ov-file#installation and restart your shell"
   echo "  or use bootstrap from .dotfiles"
 fi
-export FZF_DEFAULT_COMMAND="fd --type=f --color=always --hidden --follow"
+if (( $+commands[fd] )); then
+  export FZF_DEFAULT_COMMAND="fd --type=f --color=always --hidden --follow"
+elif (( $+commands[fdfind] )); then
+  export FZF_DEFAULT_COMMAND="fdfind --type=f --color=always --hidden --follow"
+fi
 export FZF_DEFAULT_OPTS="--ansi"
 zstyle ':completion:*' menu yes
 zstyle ':completion:*:descriptions' format '[%d]'
