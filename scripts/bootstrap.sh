@@ -388,7 +388,7 @@ bootstrap_updog() {
 		step "Installing updog"
 		echo "You may need to type in your sudo password:"
 		sudo -v
-		sudo chmod a+rwx /opt
+		_ensure_tools_dir
 		mkdir -p /opt/Tools/updog
 		python3 -m venv /opt/Tools/updog/venv
 		/opt/Tools/updog/venv/bin/pip install updog

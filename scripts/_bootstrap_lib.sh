@@ -12,3 +12,8 @@ _cmd_exists() {
 step() {
 	echo -e "## ${*}"
 }
+
+# Create /opt/Tools owned by the invoking user
+_ensure_tools_dir() {
+	sudo install -d -o "$(id -un)" -g "$(id -gn)" -m 755 /opt/Tools
+}
