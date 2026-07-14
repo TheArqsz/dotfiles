@@ -46,23 +46,21 @@ export FALLBACK_PYENV_PYTHON_VERSION=3.10.7
 # Initialization takes huge portion of time when shell is started
 # Temporary workaround: https://github.com/pyenv/pyenv/issues/2918#issuecomment-1977029534
 export PYENV_ROOT="$HOME/.pyenv"
-if [[ -d "$PYENV_ROOT" ]]; then
+if [[ -d "$PYENV_ROOT/bin" ]]; then
   export PATH="$PYENV_ROOT/bin:$PATH"
   if command -v pyenv 1>/dev/null 2>&1; then
     eval "$(pyenv init -)"
-  fi
-fi
-if [[ -d "$HOME/.pyenv" ]]; then
-  export PYENV_ROOT="$HOME/.pyenv"
-  [[ -d "$PYENV_ROOT/bin" ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-  if ! (( $+commands[python] )) || [ "$(command -v python)" != "$PYENV_ROOT/shims/python" ]; then
-    if pyenv install -l | \grep -q $DEFAULT_PYENV_PYTHON_VERSION 2>/dev/null; then
-      pyenv install -s $DEFAULT_PYENV_PYTHON_VERSION
-      pyenv global $DEFAULT_PYENV_PYTHON_VERSION
-      exec zsh
-    else
-      pyenv install -s $FALLBACK_PYENV_PYTHON_VERSION
-      pyenv global $FALLBACK_PYENV_PYTHON_VERSION
+    # _PYENV_AUTOINSTALL_DONE guards against a re-exec loop: without it, a
+    # failed install (no network, etc.) would leave the condition below true
+    # forever, and `exec zsh` would re-source this file and retry on every
+    # single shell start instead of just once.
+    if [[ -z "$_PYENV_AUTOINSTALL_DONE" ]] && { ! (( $+commands[python] )) || [ "$(command -v python)" != "$PYENV_ROOT/shims/python" ]; }; then
+      export _PYENV_AUTOINSTALL_DONE=1
+      if pyenv install -l | \grep -q "$DEFAULT_PYENV_PYTHON_VERSION" 2>/dev/null; then
+        pyenv install -s "$DEFAULT_PYENV_PYTHON_VERSION" && pyenv global "$DEFAULT_PYENV_PYTHON_VERSION"
+      else
+        pyenv install -s "$FALLBACK_PYENV_PYTHON_VERSION" && pyenv global "$FALLBACK_PYENV_PYTHON_VERSION"
+      fi
       exec zsh
     fi
   fi
@@ -367,7 +365,7 @@ bindkey -e    # Emacs keybindings
 bindkey "^A"                        history-substring-search-up                     # Ctrl+Up
 bindkey '^[[1;5A'                   history-substring-search-up                     # Ctrl+Up
 bindkey "^B"                        history-substring-search-down                   # Ctrl+Down
-bindkey '^[[1;5B'                   history-substring-search-up                     # Ctrl+Down
+bindkey '^[[1;5B'                   history-substring-search-down                   # Ctrl+Down
 # Setting this to make it work on Mac and Linux with Ctrl and Opt/Alt
 bindkey '^C'                        forward-word                                    # Ctrl+Right
 bindkey '^D'                        backward-word                                   # Ctrl+Left
@@ -446,3 +444,30 @@ if command -v pdtm >/dev/null; then
   # Generated for pdtm. Do not edit.
   export PATH=$PATH:$HOME/.pdtm/go/bin
 fi
+
+# NVM
+# ---
+# nvm.sh auto-runs `nvm use` on every source, which resolves the default
+# alias and forks repeatedly - measured ~450ms added to every shell start.
+# Load it lazily instead, only when a node-related command is first used.
+export NVM_DIR="$HOME/.nvm"
+
+_nvm_ensure_loaded() {
+  [[ -n "$_NVM_LOADED" ]] && return
+  typeset -g _NVM_LOADED=1
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+}
+nvm()  { _nvm_ensure_loaded; nvm "$@" }
+node() { _nvm_ensure_loaded; command node "$@" }
+
+source /home/arek/.safe-chain/scripts/init-posix.sh # Safe-chain Zsh initialization script
+
+# Safe-chain wraps these node-ecosystem commands too; route them through the
+# lazy nvm loader first so they resolve nvm's node/npm, not a system fallback.
+for _nvm_wrapped_cmd in npm npx yarn pnpm pnpx rush rushx bun bunx; do
+  functions[_safechain_$_nvm_wrapped_cmd]=$functions[$_nvm_wrapped_cmd]
+  eval "${_nvm_wrapped_cmd}() { _nvm_ensure_loaded; _safechain_${_nvm_wrapped_cmd} \"\$@\" }"
+done
+unset _nvm_wrapped_cmd
+# --- END NVM
