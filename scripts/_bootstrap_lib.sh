@@ -17,3 +17,14 @@ step() {
 _ensure_tools_dir() {
 	sudo install -d -o "$(id -un)" -g "$(id -gn)" -m 755 /opt/Tools
 }
+
+# $1 = owner/repo; prints the latest release tag with "v" stripped
+_gh_latest_version() {
+	local version
+	version=$(curl -fsSL "https://api.github.com/repos/$1/releases/latest" | jq -r '.tag_name // empty' | sed 's/^v//')
+	if [[ -z "$version" ]]; then
+		step "Failed to determine latest release version for $1"
+		return 1
+	fi
+	echo "$version"
+}
