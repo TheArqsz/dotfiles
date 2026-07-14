@@ -320,19 +320,6 @@ security_bootstrap_wordlists() {
 	fi
 }
 
-security_bootstrap_nomore403() {
-	echo
-	if ! _cmd_exists nomore403 && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
-		step "Installing nomore403"
-		go install -v github.com/devploit/nomore403@latest
-		step "nomore403 tool is installed"
-	elif _cmd_exists nomore403; then
-		step "nomore403 is already installed"
-	else
-		step "Golang is not installed - skipping"
-	fi
-}
-
 security_bootstrap_jsluice() {
 	echo
 	if ! _cmd_exists jsluice && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
