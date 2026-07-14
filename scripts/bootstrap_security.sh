@@ -210,7 +210,7 @@ security_bootstrap_check_mdi() {
 		step "Installing check_mdi"
 		echo "You may need to type in your sudo password:"
 		sudo -v
-		sudo chmod a+rwx /opt
+		_ensure_tools_dir
 		mkdir -p /opt/Tools
 		git clone https://github.com/TheArqsz/check_mdi /opt/Tools/check_mdi 2>/dev/null || {
 			echo "check_mdi repository is already cloned"
@@ -234,7 +234,7 @@ security_bootstrap_wordlists() {
 		step "Installing wordlists"
 		echo "You may need to type in your sudo password:"
 		sudo -v
-		sudo chmod a+rwx /opt
+		_ensure_tools_dir
 		mkdir -p /opt/Tools/wordlists
 		local choice
 		echo -n "Do you want to install OneListForAll? (y/n): "
@@ -389,7 +389,7 @@ security_bootstrap_msftrecon() {
 		step "Installing msftrecon"
 		echo "You may need to type in your sudo password:"
 		sudo -v
-		sudo chmod a+rwx /opt
+		_ensure_tools_dir
 		mkdir -p /opt/Tools
 		step "Cloning the repository"
 		git clone https://github.com/Arcanum-Sec/msftrecon /opt/Tools/msftrecon 2>/dev/null || {
@@ -416,7 +416,7 @@ security_bootstrap_trufflehog() {
 		step "Installing trufflehog"
 		echo "You may need to type in your sudo password:"
 		sudo -v
-		sudo chmod a+rwx /opt
+		_ensure_tools_dir
 		mkdir -p /opt/Tools
 		step "Cloning the repository"
 		git clone https://github.com/trufflesecurity/trufflehog.git /opt/Tools/trufflehog 2>/dev/null || {
@@ -440,7 +440,7 @@ security_bootstrap_gitleaks() {
 		step "Installing gitleaks"
 		echo "You may need to type in your sudo password:"
 		sudo -v
-		sudo chmod a+rwx /opt
+		_ensure_tools_dir
 		mkdir -p /opt/Tools
 		step "Cloning the repository"
 		git clone https://github.com/gitleaks/gitleaks.git /opt/Tools/gitleaks 2>/dev/null || {
@@ -646,7 +646,7 @@ security_bootstrap_jwt_tool() {
 		step "Installing jwt_tool"
 		echo "You may need to type in your sudo password:"
 		sudo -v
-		sudo chmod a+rwx /opt
+		_ensure_tools_dir
 		mkdir -p /opt/Tools
 		git clone https://github.com/ticarpi/jwt_tool /opt/Tools/jwt_tool 2>/dev/null || {
 			echo "jwt_tool repository is already cloned"
