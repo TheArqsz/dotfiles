@@ -11,6 +11,20 @@ function dockenter {
 	return 0
 }
 
+# Bare `find` (no args) hands off to fd/fdfind's nicer default listing; any real invocation still goes to GNU find.
+function find {
+	if [[ $# -eq 0 ]]; then
+		if (( $+commands[fd] )); then
+			fd
+			return $?
+		elif (( $+commands[fdfind] )); then
+			fdfind
+			return $?
+		fi
+	fi
+	command find "$@"
+}
+
 # Extend $PATH without duplicates
 # https://github.com/denysdovhan/dotfiles/blob/master/home/.zshrc
 function extend_path {
