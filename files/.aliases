@@ -18,7 +18,7 @@ fi
 (( $+commands[fd] )) && alias find=fd
 if (( $+commands[fdfind] )); then
     alias fd=fdfind
-    alias find=fd
+    # alias find=fd # A lot of issues with native find
 fi
 
 # Burp Suite Pro
