@@ -28,3 +28,15 @@ _gh_latest_version() {
 	fi
 	echo "$version"
 }
+
+# $1 = binary name, $2 = go module path (without @latest)
+_go_install_tool() {
+	local bin="$1" mod="$2"
+	echo
+	if ! _cmd_exists go; then
+		step "Golang is not installed - skipping"
+		return
+	fi
+	_cmd_exists "$bin" && step "Updating $bin" || step "Installing $bin"
+	go install -v "${mod}@latest" && step "$bin tool is installed"
+}
