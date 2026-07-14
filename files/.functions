@@ -338,6 +338,41 @@ function convert_jwt {
 	echo
 }
 
+# Clipboard copy/paste; clipcopy is also called by the OMZP::copyfile plugin.
+function clipcopy {
+	if [[ "$(uname)" == "Darwin" ]]; then
+		cat "${1:-/dev/stdin}" | pbcopy
+	elif (( $+commands[clip.exe] )); then
+		cat "${1:-/dev/stdin}" | clip.exe
+	elif [[ -n "$WAYLAND_DISPLAY" ]] && (( $+commands[wl-copy] )); then
+		cat "${1:-/dev/stdin}" | wl-copy
+	elif (( $+commands[xclip] )); then
+		cat "${1:-/dev/stdin}" | xclip -selection clipboard -in
+	elif (( $+commands[xsel] )); then
+		cat "${1:-/dev/stdin}" | xsel --clipboard --input
+	else
+		echo "clipcopy: no clipboard tool found" >&2
+		return 1
+	fi
+}
+
+function clippaste {
+	if [[ "$(uname)" == "Darwin" ]]; then
+		pbpaste
+	elif (( $+commands[clip.exe] )); then
+		powershell.exe -NoProfile -NoLogo -Command Get-Clipboard
+	elif [[ -n "$WAYLAND_DISPLAY" ]] && (( $+commands[wl-paste] )); then
+		wl-paste --no-newline
+	elif (( $+commands[xclip] )); then
+		xclip -selection clipboard -out
+	elif (( $+commands[xsel] )); then
+		xsel --clipboard --output
+	else
+		echo "clippaste: no clipboard tool found" >&2
+		return 1
+	fi
+}
+
 function detach_tmux {
 	if [ -z "$TMUX" ]; then
 		echo "Not a tmux session."

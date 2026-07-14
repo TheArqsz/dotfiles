@@ -131,7 +131,6 @@ zinit light zsh-users/zsh-history-substring-search
 [[ "$(uname)" != "Darwin" ]] && zinit light zdharma-continuum/fast-syntax-highlighting # this really slows down prompt typing on MacOS
 
 zinit lucid for \
-OMZL::clipboard.zsh \
 OMZP::copyfile \
 OMZP::systemd \
 OMZP::pip \
