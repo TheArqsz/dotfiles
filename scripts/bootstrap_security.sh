@@ -459,55 +459,19 @@ security_bootstrap_gitleaks() {
 }
 
 security_bootstrap_waybackurls() {
-	echo
-	if ! _cmd_exists waybackurls && _cmd_exists go; then
-		step "Installing waybackurls"
-		go install -v github.com/tomnomnom/waybackurls@latest
-		step "waybackurls tool is installed"
-	elif _cmd_exists waybackurls; then
-		step "waybackurls is already installed"
-	else
-		step "Golang is not installed - skipping"
-	fi
+	_go_install_tool waybackurls github.com/tomnomnom/waybackurls
 }
 
 security_bootstrap_assetfinder() {
-	echo
-	if ! _cmd_exists assetfinder && _cmd_exists go; then
-		step "Installing assetfinder"
-		go install -v github.com/tomnomnom/assetfinder@latest
-		step "assetfinder tool is installed"
-	elif _cmd_exists assetfinder; then
-		step "assetfinder is already installed"
-	else
-		step "Golang is not installed - skipping"
-	fi
+	_go_install_tool assetfinder github.com/tomnomnom/assetfinder
 }
 
 security_bootstrap_unfurl() {
-	echo
-	if ! _cmd_exists unfurl && _cmd_exists go; then
-		step "Installing unfurl"
-		go install -v github.com/tomnomnom/unfurl@latest
-		step "unfurl tool is installed"
-	elif _cmd_exists unfurl; then
-		step "unfurl is already installed"
-	else
-		step "Golang is not installed - skipping"
-	fi
+	_go_install_tool unfurl github.com/tomnomnom/unfurl
 }
 
 security_bootstrap_cero() {
-	echo
-	if ! _cmd_exists cero && _cmd_exists go; then
-		step "Installing cero"
-		go install -v github.com/glebarez/cero@latest
-		step "cero tool is installed"
-	elif _cmd_exists cero; then
-		step "cero is already installed"
-	else
-		step "Golang is not installed - skipping"
-	fi
+	_go_install_tool cero github.com/glebarez/cero
 }
 
 security_bootstrap_puredns() {
@@ -542,29 +506,11 @@ security_bootstrap_amass() {
 }
 
 security_bootstrap_csprecon() {
-	echo
-	if ! _cmd_exists csprecon && _cmd_exists go; then
-		step "Installing csprecon"
-		go install -v github.com/edoardottt/csprecon/cmd/csprecon@latest
-		step "csprecon tool is installed"
-	elif _cmd_exists csprecon; then
-		step "csprecon is already installed"
-	else
-		step "Golang is not installed - skipping"
-	fi
+	_go_install_tool csprecon github.com/edoardottt/csprecon/cmd/csprecon
 }
 
 security_bootstrap_shosubgo() {
-	echo
-	if ! _cmd_exists shosubgo && _cmd_exists go; then
-		step "Installing shosubgo"
-		go install -v github.com/incogbyte/shosubgo@latest
-		step "shosubgo tool is installed"
-	elif _cmd_exists shosubgo; then
-		step "shosubgo is already installed"
-	else
-		step "Golang is not installed - skipping"
-	fi
+	_go_install_tool shosubgo github.com/incogbyte/shosubgo
 }
 
 security_bootstrap_CloudRecon() {
@@ -690,16 +636,7 @@ security_bootstrap_cut-cdn() {
 }
 
 security_bootstrap_ffuf() {
-	echo
-	if ! _cmd_exists ffuf && _cmd_exists go; then
-		step "Installing ffuf"
-		go install -v github.com/ffuf/ffuf/v2@latest
-		step "ffuf tool is installed"
-	elif _cmd_exists ffuf; then
-		step "ffuf is already installed"
-	else
-		step "Golang is not installed - skipping"
-	fi
+	_go_install_tool ffuf github.com/ffuf/ffuf/v2
 }
 
 # ------------------------------------------------------------
