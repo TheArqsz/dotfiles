@@ -807,8 +807,8 @@ done
 local EXCLUDED_PACKAGES='TBD'
 # List all possible tools to bootstrap
 if [[ "$list_tools" == true ]]; then
-	all_tools=$(typeset -f | \grep -e "^security\_bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f3 | cut -d' ' -f1)
-	all_gui_tools=$(typeset -f | \grep -e "^security\_gui\_setup\_" | cut -d'_' -f4,5 | cut -d' ' -f1)
+	all_tools=$(typeset -f | \grep -e "^security\_bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | sed -E 's/^security_bootstrap_//; s/ .*//')
+	all_gui_tools=$(typeset -f | \grep -e "^security\_gui\_setup\_" | sed -E 's/^security_gui_setup_//; s/ .*//')
 	echo '--- CLI ---'
 	echo $all_tools | sort
 	echo
@@ -847,7 +847,7 @@ for tool_to_bootstrap in "${few_tools_to_bootstrap[@]}"; do
 			step "Bootstrap for $tool_to_bootstrap not implemented - exiting"
 			exit 1
 		elif [[ "$tool_to_bootstrap" == "all" ]]; then
-			all_tools=$(typeset -f | \grep -e "^security\_bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f3 | cut -d' ' -f1)
+			all_tools=$(typeset -f | \grep -e "^security\_bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | sed -E 's/^security_bootstrap_//; s/ .*//')
 			all_tools_sorted=$(echo $all_tools | sort)
 			IFS=$'\n' all_tools_sorted=($(sort <<<"$all_tools"))
 			unset IFS
@@ -869,7 +869,7 @@ for gui_tool_to_bootstrap in "${gui_tools_to_bootstrap[@]}"; do
 			step "GUI bootstrap for $gui_tool_to_bootstrap not implemented - exiting"
 			exit 1
 		elif [[ "$gui_tool_to_bootstrap" == "gui" ]]; then
-			all_tools=$(typeset -f | \grep -e "^security\_gui\_setup" | \grep -v "$EXCLUDED_PACKAGES" | cut -d'_' -f4 | cut -d' ' -f1)
+			all_tools=$(typeset -f | \grep -e "^security\_gui\_setup" | \grep -v "$EXCLUDED_PACKAGES" | sed -E 's/^security_gui_setup_//; s/ .*//')
 			all_tools_sorted=$(echo $all_tools | sort)
 			IFS=$'\n' all_tools_sorted=($(sort <<<"$all_tools"))
 			unset IFS
