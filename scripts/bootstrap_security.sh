@@ -804,7 +804,7 @@ while [ -n "$1" ]; do
 	shift
 done
 
-local EXCLUDED_PACKAGES='TBD'
+local EXCLUDED_PACKAGES='code-extensions'
 # List all possible tools to bootstrap
 if [[ "$list_tools" == true ]]; then
 	all_tools=$(typeset -f | \grep -e "^security\_bootstrap\_" | \grep -v "$EXCLUDED_PACKAGES" | sed -E 's/^security_bootstrap_//; s/ .*//')
@@ -836,7 +836,7 @@ if [ -z "$tool_to_bootstrap" -a -z "$gui_tool_to_bootstrap" ]; then
 	exit 0
 fi
 
-local EXCLUDED_PACKAGES='allgui'
+local EXCLUDED_PACKAGES='code-extensions\|burp_community'
 
 # User passed the CLI tools as a coma-separated list
 IFS=',' read -r -A few_tools_to_bootstrap <<<"$tool_to_bootstrap"
