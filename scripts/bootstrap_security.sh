@@ -333,19 +333,6 @@ security_bootstrap_nomore403() {
 	fi
 }
 
-security_bootstrap_ffuf() {
-	echo
-	if ! _cmd_exists ffuf && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
-		step "Installing ffuf"
-		go install -v github.com/ffuf/ffuf/v2@latest
-		step "ffuf tool is installed"
-	elif _cmd_exists ffuf; then
-		step "ffuf is already installed"
-	else
-		step "Golang is not installed - skipping"
-	fi
-}
-
 security_bootstrap_jsluice() {
 	echo
 	if ! _cmd_exists jsluice && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
