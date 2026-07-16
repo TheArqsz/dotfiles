@@ -680,6 +680,36 @@ bootstrap_tldr() {
 
 }
 
+bootstrap_safe-chain() {
+	echo
+	if [[ -f "$HOME/.safe-chain/scripts/init-posix.sh" ]]; then
+		step "safe-chain is already installed"
+		return
+	fi
+
+	if ! _cmd_exists curl; then
+		if [[ -f "/etc/debian_version" ]]; then
+			step "Installing safe-chain dependency - curl"
+			sudo apt-get install --show-progress -yqq curl
+		else
+			step "curl is not installed - skipping"
+			return
+		fi
+	fi
+
+	step "Installing safe-chain"
+	local SAFE_CHAIN_LATEST_VERSION
+	SAFE_CHAIN_LATEST_VERSION=$(_gh_latest_version AikidoSec/safe-chain) || return 1
+	curl -fsSL "https://github.com/AikidoSec/safe-chain/releases/download/${SAFE_CHAIN_LATEST_VERSION}/install-safe-chain.sh" | sh
+
+	if [[ -f "$HOME/.safe-chain/scripts/init-posix.sh" ]]; then
+		step "safe-chain installed"
+	else
+		step "safe-chain installation failed"
+		return 1
+	fi
+}
+
 # ------------------------------------------------------------
 
 # Main script handler and flags
