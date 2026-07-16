@@ -211,9 +211,8 @@ SPACESHIP_DIR_TRUNC=0
 # Git section
 # Do not truncate path in repos
 SPACESHIP_DIR_TRUNC_REPO=false
-# Render git section asynchronously
-SPACESHIP_GIT_BRANCH_ASYNC=false
-[[ "$(uname)" == "Darwin" ]] && SPACESHIP_GIT_BRANCH_ASYNC=true
+# Render git section asynchronously on all platforms
+SPACESHIP_GIT_BRANCH_ASYNC=true
 # Section's prefix
 SPACESHIP_GIT_PREFIX=''
 # Symbol displayed before the section (by default requires powerline patched font)
@@ -251,8 +250,8 @@ zinit light TheArqsz/spaceship-ip
 spaceship add ip
 
 # https://github.com/spaceship-prompt/spaceship-prompt/issues/1356
-SPACESHIP_PROMPT_ASYNC=false
-[[ "$(uname)" == "Darwin" ]] && SPACESHIP_PROMPT_ASYNC=true
+# Enable async on all platforms for responsive prompts
+SPACESHIP_PROMPT_ASYNC=true
 # https://github.com/spaceship-prompt/spaceship-prompt/issues/1193#issuecomment-1954674054
 SPACESHIP_PROMPT_ORDER=(
   user            # Username section
@@ -464,7 +463,6 @@ _nvm_ensure_loaded() {
 nvm()  { _nvm_ensure_loaded; nvm "$@" }
 node() { _nvm_ensure_loaded; command node "$@" }
 
-source /home/arek/.safe-chain/scripts/init-posix.sh # Safe-chain Zsh initialization script
 
 # Safe-chain wraps these node-ecosystem commands too; route them through the
 # lazy nvm loader first so they resolve nvm's node/npm, not a system fallback.
@@ -474,3 +472,4 @@ for _nvm_wrapped_cmd in npm npx yarn pnpm pnpx rush rushx bun bunx; do
 done
 unset _nvm_wrapped_cmd
 # --- END NVM
+[ -f "$HOME/.safe-chain/scripts/init-posix.sh" ] && source "$HOME/.safe-chain/scripts/init-posix.sh" # Safe-chain Zsh initialization script
