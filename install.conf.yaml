@@ -22,5 +22,8 @@
   - description: Installing submodules
     command: git submodule update --init --recursive
 
+  - description: Installing safe-chain on first run
+    command: test -f "$HOME/.safe-chain/scripts/init-posix.sh" || zsh ./scripts/bootstrap.sh -t safe-chain
+
   - description: Setting up basic directory structure for ssh
     command: chmod +x ./scripts/ssh.sh && ./scripts/ssh.sh
