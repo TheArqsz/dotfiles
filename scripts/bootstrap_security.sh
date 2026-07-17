@@ -113,6 +113,33 @@ security_bootstrap_massdns() {
 	fi
 }
 
+security_bootstrap_masscan() {
+	echo
+	if ! _cmd_exists masscan && [[ -f "/etc/debian_version" ]]; then
+		step "Installing masscan"
+		_cmd_exists apt-get || {
+			step "apt-get not installed - exiting"
+			exit 1
+		}
+		step "Installing dependencies"
+		sudo apt-get install --show-progress -yqq libpcap-dev make build-essential
+
+		local _current_dir=$(pwd)
+		local _clone_dir=$(mktemp -d)
+		# https://github.com/robertdavidgraham/masscan#building
+		git clone https://github.com/robertdavidgraham/masscan $_clone_dir
+		cd $_clone_dir
+		make &&
+			sudo make install &&
+			cd "$_current_dir" &&
+			rm -rf $_clone_dir
+	elif _cmd_exists masscan; then
+		step "masscan is already installed"
+	else
+		step "Not implemented on non Debian-based system - skipping"
+	fi
+}
+
 security_bootstrap_projectdiscovery() {
 	echo
 	if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
