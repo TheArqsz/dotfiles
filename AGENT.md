@@ -86,6 +86,7 @@ fi
 ### Functions (`.functions`)
 
 - Extend PATH with `extend_path DIR` — no duplicates, no direct `$PATH=`
+- Use `gitleaks_entropy STRING` to calculate Shannon entropy using Gitleaks' current string handling
 - Toggle prompt sections via `switch_prompt_ip` / `switch_prompt_hostname`
 
 ### Zsh / `.zshrc`

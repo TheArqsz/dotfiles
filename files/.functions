@@ -36,6 +36,45 @@ function extend_path {
 	# Test
 }
 
+# Calculate Shannon entropy using Gitleaks' current string handling.
+function gitleaks_entropy {
+	if [[ $# -ne 1 ]]; then
+		echo "usage: gitleaks_entropy <string>" >&2
+		return 2
+	fi
+
+	if (( ! $+commands[python3] )); then
+		echo "python3 not found" >&2
+		return 1
+	fi
+
+	command python3 - "$1" <<'PY'
+import math
+import sys
+
+data = sys.argv[1]
+if data == "":
+    print("0")
+    raise SystemExit(0)
+
+# Match Go's len(string): UTF-8 byte length.
+byte_len = len(data.encode("utf-8"))
+
+# Match map[rune]int counting in Go.
+counts = {}
+for ch in data:
+    counts[ch] = counts.get(ch, 0) + 1
+
+inv_len = 1.0 / byte_len
+entropy = 0.0
+for count in counts.values():
+    freq = count * inv_len
+    entropy -= freq * math.log2(freq)
+
+print(f"{entropy:.10f}".rstrip("0").rstrip("."))
+PY
+}
+
 # Hide or show IP addr from Spaceship prompt
 function switch_prompt_ip {
 	local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"

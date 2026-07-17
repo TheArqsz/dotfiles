@@ -204,6 +204,8 @@ This repository includes several useful functions to enhance the workflow. Below
 
 - **extend_path**: Extend the $PATH environment variable without adding duplicates.
 
+- **gitleaks_entropy**: Calculate Shannon entropy for a string using Gitleaks' current string handling.
+
 - **switch_prompt_ip**: Toggle the display of the IP address in the Spaceship prompt.
 
 - **switch_prompt_hostname**: Toggle the display of the hostname in the Spaceship prompt.
