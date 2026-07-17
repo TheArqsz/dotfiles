@@ -214,6 +214,10 @@ bootstrap_system() {
 		step "Installing jq"
 		sudo apt install --show-progress -yqq jq
 	fi
+	if ! _cmd_exists rg; then
+		step "Installing ripgrep"
+		sudo apt install --show-progress -yqq ripgrep
+	fi
 	step "Setting up UFW"
 	sudo ufw default deny incoming
 	sudo ufw default allow outgoing
