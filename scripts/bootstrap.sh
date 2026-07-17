@@ -710,6 +710,80 @@ bootstrap_safe-chain() {
 	fi
 }
 
+bootstrap_azure-cli() {
+	echo
+	if ! _cmd_exists az && [[ -f "/etc/debian_version" ]]; then
+		step "Installing Azure CLI"
+		echo "You may need to type in your sudo password:"
+		sudo -v
+
+		sudo apt-get update -yqq
+		sudo apt-get install --show-progress -yqq ca-certificates curl apt-transport-https lsb-release gnupg
+
+		local distro_codename
+		distro_codename=$(lsb_release -cs)
+
+		local available_versions
+		available_versions=$(curl -fsSL "https://packages.microsoft.com/repos/azure-cli/dists/" 2>/dev/null | \grep -oP 'href="[^"]*/"' | \grep -oP '[^/]+(?=/")' | sort -V) || true
+
+		local repo_version="$distro_codename"
+
+		if ! echo "$available_versions" | grep -q "^${distro_codename}$"; then
+			step "Current distro version ($distro_codename) not available in Azure CLI repo"
+			step "Available versions: $(echo "$available_versions" | tr '\n' ' ')"
+
+			local fallback_versions=("oracular" "noble" "jammy" "focal" "bookworm")
+			for fallback_ver in "${fallback_versions[@]}"; do
+				if echo "$available_versions" | grep -q "^${fallback_ver}$"; then
+					repo_version="$fallback_ver"
+					step "Using fallback version: $repo_version"
+					break
+				fi
+			done
+
+			if [[ "$repo_version" == "$distro_codename" ]]; then
+				repo_version=$(echo "$available_versions" | tail -1)
+				step "Using latest available version: $repo_version"
+			fi
+		else
+			step "Using distro version: $repo_version"
+		fi
+
+		sudo mkdir -p /etc/apt/keyrings
+		curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor >/tmp/microsoft.gpg
+		sudo mv /tmp/microsoft.gpg /etc/apt/keyrings/microsoft.gpg
+		sudo chmod a+r /etc/apt/keyrings/microsoft.gpg
+
+		echo "deb [arch=amd64,arm64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ ${repo_version} main" |
+			sudo tee /etc/apt/sources.list.d/azure-cli.list >/dev/null
+
+		sudo apt-get update -yqq
+		sudo apt-get install --show-progress -yqq azure-cli
+
+		if _cmd_exists az; then
+			step "Azure CLI installed successfully"
+			az version | head -1
+		else
+			step "Failed to install Azure CLI"
+			return 1
+		fi
+	elif ! _cmd_exists az && [[ "$(uname)" == "Darwin" ]] && _cmd_exists brew; then
+		step "Installing Azure CLI on macOS"
+		brew install azure-cli
+		if _cmd_exists az; then
+			step "Azure CLI installed successfully"
+		else
+			step "Failed to install Azure CLI"
+			return 1
+		fi
+	elif _cmd_exists az; then
+		step "Azure CLI is already installed"
+	else
+		step "Azure CLI installation not implemented for this system"
+		return 1
+	fi
+}
+
 # ------------------------------------------------------------
 
 # Main script handler and flags
