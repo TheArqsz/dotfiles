@@ -210,6 +210,10 @@ bootstrap_system() {
 		step "Installing UFW"
 		sudo apt update -yqq && sudo apt install --show-progress -yqq ufw
 	fi
+	if ! _cmd_exists jq; then
+		step "Installing jq"
+		sudo apt install --show-progress -yqq jq
+	fi
 	step "Setting up UFW"
 	sudo ufw default deny incoming
 	sudo ufw default allow outgoing
