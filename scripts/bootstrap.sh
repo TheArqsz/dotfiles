@@ -517,15 +517,18 @@ bootstrap_tmux() {
 	step "Installing Tmux"
 	step "  Installing version $TMUX_LATEST_VERSION"
 	step "  Downloading official release"
-	curl -# -SL "https://github.com/tmux/tmux/releases/download/$TMUX_LATEST_VERSION/tmux-${TMUX_LATEST_VERSION}.tar.gz" --output /tmp/tmux_${TMUX_LATEST_VERSION}.tar.gz
-	sudo tar -C /tmp/ -zxf /tmp/tmux_${TMUX_LATEST_VERSION}.tar.gz
-	cd /tmp/tmux-$TMUX_LATEST_VERSION/
+
+	local _current_dir=$(pwd)
+	local _clone_dir=$(mktemp -d)
+	curl -# -SL "https://github.com/tmux/tmux/releases/download/$TMUX_LATEST_VERSION/tmux-${TMUX_LATEST_VERSION}.tar.gz" --output "$_clone_dir/tmux-${TMUX_LATEST_VERSION}.tar.gz"
+	tar -C "$_clone_dir" -zxf "$_clone_dir/tmux-${TMUX_LATEST_VERSION}.tar.gz"
+	cd "$_clone_dir/tmux-$TMUX_LATEST_VERSION/"
 	step "  Running configure"
-	sudo ./configure 1>/dev/null
+	./configure 1>/dev/null
 	step "  Running make and make install"
-	sudo make 1>/dev/null && sudo make install 1>/dev/null &&
-		sudo rm -rf /tmp/tmux-$TMUX_LATEST_VERSION/
-	cd -
+	make 1>/dev/null && sudo make install 1>/dev/null
+	cd "$_current_dir"
+	rm -rf "$_clone_dir"
 	tmux kill-server 2>/dev/null
 	step "Tmux installed"
 }
