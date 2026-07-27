@@ -20,6 +20,7 @@ Options:
                            gui: Install additional GUI-based tools (e.g. Signal, Brave, Burp Suite Pro)
                            tool1,tool2: Specify multiple tools separated by a comma
     --gui-tool             Install specific GUI tool
+    -f, --force            Force reinstall of tool(s) even if already installed
 
     -l, --list-tools       List tools to be bootstrapped
     -s, --system           Bootstrap system
@@ -256,11 +257,11 @@ bootstrap_code() {
 	echo
 	step "Setting up VSCode with extensions and config"
 	# WSL
-	if ! _cmd_exists code && [[ "$(uname -r)" == *"microsoft"* ]]; then
+	if (! _cmd_exists code || [[ "$force_reinstall" == "true" ]]) && [[ "$(uname -r)" == *"microsoft"* ]]; then
 		step "Working in WSL - install VSCode on your host"
 		step "      https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode"
 	# Debian-based system
-	elif ! _cmd_exists code && [[ -f "/etc/debian_version" ]]; then
+	elif (! _cmd_exists code || [[ "$force_reinstall" == "true" ]]) && [[ -f "/etc/debian_version" ]]; then
 		# https://code.visualstudio.com/docs/setup/linux
 		echo "You may need to type in your sudo password:"
 		sudo -v
@@ -274,7 +275,7 @@ bootstrap_code() {
 		sudo apt update -yqq
 		sudo apt install --show-progress -yqq code
 	# MacOS
-	elif ! _cmd_exists code && [[ "$(uname)" == "Darwin" ]]; then
+	elif (! _cmd_exists code || [[ "$force_reinstall" == "true" ]]) && [[ "$(uname)" == "Darwin" ]]; then
 		_cmd_exists brew || {
 			step "Brew not installed - exiting"
 			exit 1
@@ -330,7 +331,7 @@ bootstrap_code() {
 bootstrap_docker() {
 	echo
 	# Debian-based system
-	if ! _cmd_exists docker && [[ -f "/etc/debian_version" ]]; then
+	if (! _cmd_exists docker || [[ "$force_reinstall" == "true" ]]) && [[ -f "/etc/debian_version" ]]; then
 		_cmd_exists apt-get || {
 			step "apt-get not installed - exiting"
 			exit 1
@@ -392,7 +393,7 @@ bootstrap_updog() {
 	if ! _cmd_exists python3; then
 		step "Installing updog dependencies"
 		sudo apt-get install --show-progress -yqq python3 python3-venv
-	elif ! _cmd_exists updog && _cmd_exists python3 && $(python3 -m venv -h 2>&1 1>/dev/null); then
+	elif (! _cmd_exists updog || [[ "$force_reinstall" == "true" ]]) && _cmd_exists python3 && $(python3 -m venv -h 2>&1 1>/dev/null); then
 		step "Installing updog"
 		echo "You may need to type in your sudo password:"
 		sudo -v
@@ -411,7 +412,7 @@ bootstrap_updog() {
 
 bootstrap_golang() {
 	echo
-	if ! _cmd_exists go; then
+	if ! _cmd_exists go || [[ "$force_reinstall" == "true" ]]; then
 		if ! _cmd_exists curl; then
 			step "Installing Go dependency - curl"
 			sudo apt-get install --show-progress -yqq curl
@@ -434,7 +435,7 @@ bootstrap_go() {
 
 bootstrap_fzf() {
 	echo
-	if ! _cmd_exists fzf; then
+	if ! _cmd_exists fzf || [[ "$force_reinstall" == "true" ]]; then
 		step "Installing FZF"
 		[[ -d "$HOME/.fzf" ]] || git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
 		[[ -f "$HOME/.fzf/bin/fzf" ]] || "$HOME/.fzf/install" --no-zsh --no-bash --no-update-rc --no-completion --no-key-bindings --bin
@@ -449,7 +450,7 @@ bootstrap_fzf() {
 
 bootstrap_pyenv() {
 	echo
-	if ! _cmd_exists pyenv; then
+	if ! _cmd_exists pyenv || [[ "$force_reinstall" == "true" ]]; then
 		step "Installing pyenv dependencies"
 		sudo apt-get install --show-progress -yqq build-essential libssl-dev zlib1g-dev \
 			libbz2-dev libreadline-dev libsqlite3-dev curl git \
@@ -465,7 +466,7 @@ bootstrap_pyenv() {
 
 bootstrap_fdfind() {
 	echo
-	if ! _cmd_exists fdfind && ! _cmd_exists fd; then
+	if (! _cmd_exists fdfind && ! _cmd_exists fd) || [[ "$force_reinstall" == "true" ]]; then
 		step "Installing fdfind"
 		FD_LATEST_VERSION=$(_gh_latest_version sharkdp/fd) || return 1
 		step "  Downloading official release"
@@ -480,7 +481,7 @@ bootstrap_fdfind() {
 
 bootstrap_eza() {
 	echo
-	if ! _cmd_exists eza; then
+	if ! _cmd_exists eza || [[ "$force_reinstall" == "true" ]]; then
 		step "Installing eza dependencies"
 		sudo apt-get install --show-progress -yqq curl gpg
 		step "Installing eza"
@@ -498,45 +499,33 @@ bootstrap_eza() {
 bootstrap_tmux() {
 	echo
 	TMUX_LATEST_VERSION=$(_gh_latest_version tmux/tmux) || return 1
-	if _cmd_exists tmux; then
-		if [[ "tmux $TMUX_LATEST_VERSION" == "$(tmux -V)" ]]; then
-			step "Tmux is already installed and updated to the latest version"
-			return
-		else
-			step "Tmux is already installed - updating"
-			sudo apt-get remove -yqq tmux 2>/dev/null
-			# If still exists
-			if _cmd_exists tmux; then
-				step "Force removing old tmux (was not installed with apt)"
-				sudo rm -f $(which tmux) 2>/dev/null
-			fi
-		fi
-	fi
-	step "Installing Tmux dependencies"
-	sudo apt-get install --show-progress -yqq libevent-dev ncurses-dev build-essential bison pkg-config
-	step "Installing Tmux"
-	step "  Installing version $TMUX_LATEST_VERSION"
-	step "  Downloading official release"
+	if [[ "$force_reinstall" == "true" ]] || ! _cmd_exists tmux || ! [[ "tmux $TMUX_LATEST_VERSION" == "$(tmux -V)" ]]; then
+		step "Installing Tmux dependencies"
+		sudo apt-get install --show-progress -yqq libevent-dev ncurses-dev build-essential bison pkg-config
+		step "Installing Tmux"
+		step "  Installing version $TMUX_LATEST_VERSION"
+		step "  Downloading official release"
 
-	local _current_dir=$(pwd)
-	local _clone_dir=$(mktemp -d)
-	curl -# -SL "https://github.com/tmux/tmux/releases/download/$TMUX_LATEST_VERSION/tmux-${TMUX_LATEST_VERSION}.tar.gz" --output "$_clone_dir/tmux-${TMUX_LATEST_VERSION}.tar.gz"
-	tar -C "$_clone_dir" -zxf "$_clone_dir/tmux-${TMUX_LATEST_VERSION}.tar.gz"
-	cd "$_clone_dir/tmux-$TMUX_LATEST_VERSION/"
-	step "  Running configure"
-	./configure 1>/dev/null
-	step "  Running make and make install"
-	make 1>/dev/null && sudo make install 1>/dev/null
-	cd "$_current_dir"
-	rm -rf "$_clone_dir"
-	tmux kill-server 2>/dev/null
-	step "Tmux installed"
+		local _current_dir=$(pwd)
+		local _clone_dir=$(mktemp -d)
+		curl -# -SL "https://github.com/tmux/tmux/releases/download/$TMUX_LATEST_VERSION/tmux-${TMUX_LATEST_VERSION}.tar.gz" --output "$_clone_dir/tmux-${TMUX_LATEST_VERSION}.tar.gz"
+		tar -C "$_clone_dir" -zxf "$_clone_dir/tmux-${TMUX_LATEST_VERSION}.tar.gz"
+		cd "$_clone_dir/tmux-$TMUX_LATEST_VERSION/"
+		step "  Running configure"
+		./configure 1>/dev/null
+		step "  Running make and make install"
+		make 1>/dev/null && sudo make install 1>/dev/null
+		cd "$_current_dir"
+		rm -rf "$_clone_dir"
+		tmux kill-server 2>/dev/null
+		step "Tmux installed"
+	fi
 }
 
 bootstrap_brew() {
 	echo
 	# Debian-based system
-	if ! _cmd_exists brew && [[ -f "/etc/debian_version" ]]; then
+	if (! _cmd_exists brew || [[ "$force_reinstall" == "true" ]]) && [[ -f "/etc/debian_version" ]]; then
 		_cmd_exists apt-get || {
 			step "apt-get not installed - exiting"
 			exit 1
@@ -547,8 +536,8 @@ bootstrap_brew() {
 		step "Installing brew dependencies"
 		sudo apt-get install --show-progress -yqq build-essential procps curl file git
 		# https://docs.brew.sh/Installation
-		$(which bash) -c "NONINTERACTIVE=1 $(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) 1>brew.log"
-		step "Brew is probably installed - reload your shell or check brew.log"
+		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | NONINTERACTIVE=1 bash
+		step "Brew installed"
 	elif _cmd_exists brew; then
 		step "Brew is already installed"
 	fi
@@ -557,7 +546,7 @@ bootstrap_brew() {
 
 bootstrap_c4p() {
 	echo
-	if ! _cmd_exists c4p && ! [[ -d "$HOME/.c4p" ]]; then
+	if (! _cmd_exists c4p && ! [[ -d "$HOME/.c4p" ]]) || [[ "$force_reinstall" == "true" ]]; then
 		_cmd_exists docker || {
 			step "docker is not installed - bootstrapping"
 			bootstrap_docker
@@ -582,7 +571,7 @@ bootstrap_cryptomator-cli() {
 	echo
 	CRYPTO_CLI_LATEST_VERSION=$(_gh_latest_version cryptomator/cli) || return 1
 	# Debian-based system
-	if [[ -f "/etc/debian_version" ]]; then
+	if (! _cmd_exists cryptomator-cli || [[ "$force_reinstall" == "true" ]]) && [[ -f "/etc/debian_version" ]]; then
 		step "Installing Cryptomator's CLI on Debian-based system"
 		step "You may need to type in your sudo password:"
 		sudo -v
@@ -614,59 +603,49 @@ bootstrap_cryptomator-cli() {
 bootstrap_micro() {
 	echo
 	MICRO_LATEST_VERSION=$(_gh_latest_version zyedidia/micro) || return 1
-	if _cmd_exists micro; then
-		if micro -version | grep -q "Version: $MICRO_LATEST_VERSION"; then
-			step "Micro is already installed and updated to the latest version"
-			return
-		else
-			step "Micro is already installed - updating"
-			sudo apt-get remove -yqq micro 2>/dev/null
-			# If still exists
-			if _cmd_exists micro; then
-				step "Force removing old micro (was not installed with apt)"
-				sudo rm -f $(which micro) 2>/dev/null
-			fi
-		fi
-	fi
-	platform=''
-	machine=$(uname -m)
-	case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
-	"linux")
-		case "$machine" in
-		"arm64"* | "aarch64"*) platform='linux-arm64' ;;
-		"arm"* | "aarch"*) platform='linux-arm' ;;
-		*"86") platform='linux32' ;;
-		*"64") platform='linux64' ;;
+	if [[ "$force_reinstall" == "true" ]] || ! _cmd_exists micro || ! (micro -version | grep -q "Version: $MICRO_LATEST_VERSION"); then
+		platform=''
+		machine=$(uname -m)
+		case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
+		"linux")
+			case "$machine" in
+			"arm64"* | "aarch64"*) platform='linux-arm64' ;;
+			"arm"* | "aarch"*) platform='linux-arm' ;;
+			*"86") platform='linux32' ;;
+			*"64") platform='linux64' ;;
+			esac
+			;;
+		"darwin") platform='osx' ;;
 		esac
-		;;
-	"darwin") platform='osx' ;;
-	esac
-	step "Installing micro"
-	step "  Installing version $MICRO_LATEST_VERSION"
-	step "  Downloading official release"
-	curl -# -SL "https://github.com/zyedidia/micro/releases/download/v${MICRO_LATEST_VERSION}/micro-${MICRO_LATEST_VERSION}-${platform}-static.tar.gz" --output /tmp/micro_${MICRO_LATEST_VERSION}.tar.gz
-	tar -C /tmp/ -zxf /tmp/micro_${MICRO_LATEST_VERSION}.tar.gz
-	cd /tmp/micro-$MICRO_LATEST_VERSION/
-	sudo mv -f micro /usr/local/bin/
-	sudo rm -rf /tmp/micro-$MICRO_LATEST_VERSION/
-	cd -
-	if [[ "$(uname -r)" == *"microsoft"* ]]; then
-		step "Updating xclip for WSL"
-		sudo ln -fs "$DOTFILES/misc/micro/wsl-xclip.sh" /usr/bin/xclip && sudo chmod +x /usr/bin/xclip
-		sudo ln -fs "$DOTFILES/misc/micro/wsl-xclip.sh" /usr/bin/xsel && sudo chmod +x /usr/bin/xsel
-	elif [[ -f "/etc/debian_version" ]]; then
-		sudo apt-get install --show-progress -yqq xclip xsel
+		step "Installing micro"
+		step "  Installing version $MICRO_LATEST_VERSION"
+		step "  Downloading official release"
+		curl -# -SL "https://github.com/zyedidia/micro/releases/download/v${MICRO_LATEST_VERSION}/micro-${MICRO_LATEST_VERSION}-${platform}-static.tar.gz" --output /tmp/micro_${MICRO_LATEST_VERSION}.tar.gz
+		tar -C /tmp/ -zxf /tmp/micro_${MICRO_LATEST_VERSION}.tar.gz
+		cd /tmp/micro-$MICRO_LATEST_VERSION/
+		sudo mv -f micro /usr/local/bin/
+		sudo rm -rf /tmp/micro-$MICRO_LATEST_VERSION/
+		cd -
+		if [[ "$(uname -r)" == *"microsoft"* ]]; then
+			step "Updating xclip for WSL"
+			sudo ln -fs "$DOTFILES/misc/micro/wsl-xclip.sh" /usr/bin/xclip && sudo chmod +x /usr/bin/xclip
+			sudo ln -fs "$DOTFILES/misc/micro/wsl-xclip.sh" /usr/bin/xsel && sudo chmod +x /usr/bin/xsel
+		elif [[ -f "/etc/debian_version" ]]; then
+			sudo apt-get install --show-progress -yqq xclip xsel
+		fi
+		mkdir -p "$HOME/.config/micro"
+		ln -fs "$DOTFILES/misc/micro/settings.json" "$HOME/.config/micro/settings.json"
+		ln -fs "$DOTFILES/misc/micro/bindings.json" "$HOME/.config/micro/bindings.json"
+		step "Micro installed"
+	else
+		step "Micro is already installed"
 	fi
-	mkdir -p "$HOME/.config/micro"
-	ln -fs "$DOTFILES/misc/micro/settings.json" "$HOME/.config/micro/settings.json"
-	ln -fs "$DOTFILES/misc/micro/bindings.json" "$HOME/.config/micro/bindings.json"
-	step "Micro installed"
 }
 
 bootstrap_tldr() {
 	echo
 	# Debian-based system
-	if ! _cmd_exists tldr && [[ -f "/etc/debian_version" ]]; then
+	if (! _cmd_exists tldr || [[ "$force_reinstall" == "true" ]]) && [[ -f "/etc/debian_version" ]]; then
 		_cmd_exists apt-get || {
 			step "apt-get not installed - exiting"
 			exit 1
@@ -723,7 +702,7 @@ bootstrap_safe-chain() {
 
 bootstrap_azure-cli() {
 	echo
-	if ! _cmd_exists az && [[ -f "/etc/debian_version" ]]; then
+	if (! _cmd_exists az || [[ "$force_reinstall" == "true" ]]) && [[ -f "/etc/debian_version" ]]; then
 		step "Installing Azure CLI"
 		echo "You may need to type in your sudo password:"
 		sudo -v
@@ -795,6 +774,34 @@ bootstrap_azure-cli() {
 	fi
 }
 
+bootstrap_yt-dlp() {
+	echo
+	if ! _cmd_exists yt-dlp || [[ "$force_reinstall" == "true" ]]; then
+		step "Installing yt-dlp"
+		if ! _cmd_exists python3; then
+			step "Installing yt-dlp dependencies"
+			sudo apt-get install --show-progress -yqq python3 python3-venv
+		fi
+		if _cmd_exists python3 && $(python3 -m venv -h 2>&1 1>/dev/null); then
+			echo "You may need to type in your sudo password:"
+			sudo -v
+			_ensure_tools_dir
+			mkdir -p /opt/Tools/yt-dlp
+			python3 -m venv /opt/Tools/yt-dlp/venv
+			/opt/Tools/yt-dlp/venv/bin/pip install yt-dlp
+			echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/yt-dlp 1>/dev/null
+			echo '/opt/Tools/yt-dlp/venv/bin/yt-dlp "$@"' | sudo tee -a /usr/local/bin/yt-dlp 1>/dev/null
+			sudo chmod +x /usr/local/bin/yt-dlp
+			step "yt-dlp installed"
+		else
+			step "Failed to install yt-dlp"
+			return 1
+		fi
+	else
+		step "yt-dlp is already installed"
+	fi
+}
+
 # ------------------------------------------------------------
 
 # Main script handler and flags
@@ -804,6 +811,7 @@ bt_system=false
 list_tools=false
 additional_code_extensions=
 list_default_code_ext=false
+force_reinstall=false
 
 # CLI Parameters
 if [ $# -eq 0 ]; then
@@ -856,6 +864,10 @@ while [ -n "$1" ]; do
 		fi
 		gui_tool_to_bootstrap="$2"
 		shift
+		;;
+	-f | --force)
+		force_reinstall=true
+		shift 0
 		;;
 	-v | --verbose)
 		set -x
