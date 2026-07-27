@@ -73,6 +73,7 @@ Key helpers from `_bootstrap_lib.sh`:
 - New dotfile: drop it in `files/` as `.<name>` — glob auto-symlinks it
 - New `$HOME` directory: add to `create:` section in `install.conf.yaml`
 - New bootstrap shell command: add to `shell:` section
+- Ensure a real `python` executable exists for tools that use `spawn("python")`; if missing but `python3` exists, create `~/.local/bin/python -> $(command -v python3)`
 
 ### Aliases (`.aliases`)
 

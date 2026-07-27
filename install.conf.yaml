@@ -25,5 +25,8 @@
   - description: Installing safe-chain on first run
     command: test -f "$HOME/.safe-chain/scripts/init-posix.sh" || zsh ./scripts/bootstrap.sh -t safe-chain
 
+  - description: Ensuring python executable for VS Code/Node tools
+    command: command -v python >/dev/null 2>&1 || { py3="$(command -v python3 2>/dev/null)"; [ -n "$py3" ] && mkdir -p "$HOME/.local/bin" && ln -sfn "$py3" "$HOME/.local/bin/python"; }
+
   - description: Setting up basic directory structure for ssh
     command: chmod +x ./scripts/ssh.sh && ./scripts/ssh.sh

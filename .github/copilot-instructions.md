@@ -14,6 +14,7 @@ This is a personal dotfiles repo for a security researcher/pentester.
 - Use `_go_install_tool bin gomod` for Go tool installs
 - Use `step "MSG"` for section output headers
 - Python venv tools → `/opt/Tools/TOOLNAME/`; system binaries → `/usr/local/bin/`
+- Ensure a real `python` executable exists for VS Code/Node `spawn("python")` compatibility; if missing but `python3` exists, install shim at `~/.local/bin/python`
 
 ### Dotfiles
 - New dotfiles go in `files/` as `.<name>` — dotbot auto-symlinks via glob
