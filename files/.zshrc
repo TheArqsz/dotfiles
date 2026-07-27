@@ -36,6 +36,13 @@ then
   source ~/.functions
 fi
 
+# Include untracked local overrides for personal envs/aliases.
+LOCAL_OVERRIDES="$HOME/.config/zsh/local-overrides.zsh"
+if [ -f "$LOCAL_OVERRIDES" ]
+then
+  source "$LOCAL_OVERRIDES"
+fi
+
 # Allow comments even in interactive shells.
 setopt interactive_comments
 
@@ -473,3 +480,8 @@ done
 unset _nvm_wrapped_cmd
 # --- END NVM
 [ -f "$HOME/.safe-chain/scripts/init-posix.sh" ] && source "$HOME/.safe-chain/scripts/init-posix.sh" # Safe-chain Zsh initialization script
+
+
+# Generated for pdtm. Do not edit.
+export PATH=$PATH:/home/arek/.pdtm/go/bin
+

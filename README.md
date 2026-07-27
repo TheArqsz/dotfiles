@@ -10,6 +10,7 @@ Inspired by:
 
 * [Installation](#installation)
 * [Updating](#updating)
+* [Local private overrides](#local-private-overrides)
 * [What exactly is it?](#what-exactly-is-it)
 	* [Zinit and plugins](#zinit-and-plugins)
 	* [Prompt](#prompt)
@@ -53,6 +54,30 @@ Use single command to get latest updates:
 `update`
 
 This command will update dotfiles, [c4p](https://github.com/TheArqsz/containers4pentesters) (if installed), brew, apt-get packages and zinit plugins.
+
+## Local private overrides
+
+Use this for machine-specific env vars, aliases, and helper functions that must not be committed.
+
+Create `~/.config/zsh/local-overrides.zsh` (outside this repository). It is sourced from `.zshrc` when present.
+
+```zsh
+# ~/.config/zsh/local-overrides.zsh
+
+# Private envs
+export LAB_PROFILE="internal"
+export MY_API_URL="http://127.0.0.1:9000"
+
+# Personal aliases
+alias ll='ls -lah'
+alias kctx='kubectl config current-context'
+```
+
+Then reload your shell:
+
+```zsh
+reload
+```
 
 ##  What exactly is it?
 

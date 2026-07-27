@@ -95,6 +95,7 @@ fi
 - Use zinit `ice` directives for deferred/conditional plugin loading
 - fzf backend: `fd`/`fdfind` preferred over `find`
 - Custom spaceship sections go in `~/.config/custom.spaceship.zsh`
+- Personal, untracked overrides go in `~/.config/zsh/local-overrides.zsh` (envs, aliases, local-only functions)
 
 ---
 

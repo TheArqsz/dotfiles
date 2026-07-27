@@ -19,6 +19,7 @@ This is a personal dotfiles repo for a security researcher/pentester.
 - New dotfiles go in `files/` as `.<name>` — dotbot auto-symlinks via glob
 - New `$HOME` dirs go in `create:` section of `install.conf.yaml`
 - Do not edit `dotbot/` subdirectory — it is a git submodule
+- Keep personal untracked overrides in `~/.config/zsh/local-overrides.zsh` (for local envs/aliases/functions)
 
 ### Aliases / Functions
 - Wrap tool-specific aliases in `_cmd_exists` guards
