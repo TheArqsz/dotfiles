@@ -394,6 +394,20 @@ security_bootstrap_nomore403() {
 	fi
 }
 
+security_bootstrap_gobuster() {
+	# https://github.com/OJ/gobuster
+	echo
+	if (! _cmd_exists gobuster || [[ "$force_reinstall" == "true" ]]) && _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+		step "Installing gobuster"
+		go install -v github.com/OJ/gobuster/v3@latest
+		step "gobuster installed"
+	elif _cmd_exists gobuster && [[ "$force_reinstall" != "true" ]]; then
+		step "gobuster is already installed"
+	else
+		step "Golang is not installed - skipping"
+	fi
+}
+
 security_bootstrap_caduceus() {
 	# https://github.com/g0ldencybersec/Caduceus
 	# https://github.com/jhaddix/Caduceus
