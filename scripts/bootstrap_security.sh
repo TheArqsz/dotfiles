@@ -680,6 +680,53 @@ security_bootstrap_ffuf() {
 	_go_install_tool ffuf github.com/ffuf/ffuf/v2
 }
 
+security_bootstrap_ct-hulhu() {
+	_go_install_tool ct-hulhu github.com/TheArqsz/ct-hulhu/cmd/ct-hulhu
+}
+
+security_bootstrap_tenant-domains() {
+	# https://github.com/TheArqsz/tenant-domains
+	echo
+	if ! _cmd_exists tenant-domains && [[ -f "/etc/debian_version" ]]; then
+		step "Installing tenant-domains"
+		sudo apt-get install --show-progress -yqq jq curl
+		sudo curl -o /usr/local/bin/tenant-domains https://raw.githubusercontent.com/TheArqsz/tenant-domains/master/tenant-domains.sh
+		sudo chmod +x /usr/local/bin/tenant-domains
+		step "tenant-domains tool is installed"
+	elif _cmd_exists tenant-domains; then
+		step "tenant-domains is already installed"
+	fi
+}
+
+security_bootstrap_gcheck() {
+	# https://github.com/TheArqsz/gcheck
+	echo
+	if ! _cmd_exists python3; then
+		step "Installing gcheck dependencies"
+		sudo apt-get install --show-progress -yqq python3 python3-venv
+	fi
+	if ! _cmd_exists gcheck && _cmd_exists python3 && $(python3 -m venv -h 2>&1 1>/dev/null); then
+		step "Installing gcheck"
+		echo "You may need to type in your sudo password:"
+		sudo -v
+		_ensure_tools_dir
+		mkdir -p /opt/Tools
+		git clone https://github.com/TheArqsz/gcheck /opt/Tools/gcheck 2>/dev/null || {
+			echo "gcheck repository is already cloned"
+		}
+		python3 -m venv /opt/Tools/gcheck/venv
+		/opt/Tools/gcheck/venv/bin/pip install /opt/Tools/gcheck
+		echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/gcheck 1>/dev/null
+		echo '/opt/Tools/gcheck/venv/bin/gcheck "$@"' | sudo tee -a /usr/local/bin/gcheck 1>/dev/null
+		sudo chmod +x /usr/local/bin/gcheck
+		step "gcheck tool is installed"
+	elif _cmd_exists gcheck; then
+		step "gcheck is already installed"
+	else
+		step "Python or venv are not installed - skipping"
+	fi
+}
+
 # ------------------------------------------------------------
 
 # Installation of GUI tools
