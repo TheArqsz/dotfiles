@@ -24,8 +24,24 @@ update_dotfiles() {
 	info "## Updating dotfiles"
 
 	cd "$DOTFILES" || exit
+
+	local stashed=0
+	if ! git diff --quiet || ! git diff --cached --quiet; then
+		info "Local changes detected — stashing before pull"
+		git stash push --include-untracked -m "update.sh: auto-stash $(date +%Y-%m-%dT%H:%M:%S)"
+		stashed=1
+	fi
+
 	git pull
 	./install --except shell
+
+	if [[ "$stashed" -eq 1 ]]; then
+		info "Restoring local changes"
+		if ! git stash pop; then
+			info "Could not restore stashed changes automatically — resolve conflicts and run 'git stash pop' manually"
+		fi
+	fi
+
 	cd - >/dev/null 2>&1 || exit
 
 	info "Updating Zinit plugins"

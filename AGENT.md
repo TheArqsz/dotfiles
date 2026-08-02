@@ -100,6 +100,15 @@ fi
 
 ---
 
+## Commit Workflow
+
+- Every atomic change (one logical fix/feature/tweak) **must be followed by a commit** using [Conventional Commits](https://www.conventionalcommits.org/) format: `type(scope): summary` — e.g. `fix(update): stash local changes before pull`, `feat(bootstrap): add gobuster installer`
+- Common types: `feat`, `fix`, `chore`, `refactor`, `docs`, `style`, `test`
+- Keep commits scoped to one change — don't bundle unrelated edits
+- Follow the repo's existing commit message style (see `git log`) for casing/tense
+
+---
+
 ## Common Commands
 
 ```bash
