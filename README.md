@@ -53,7 +53,7 @@ Use single command to get latest updates:
 
 `update`
 
-This command will update dotfiles, [c4p](https://github.com/TheArqsz/containers4pentesters) (if installed), brew, apt-get packages and zinit plugins.
+This command will update dotfiles, brew, apt-get packages and zinit plugins.
 
 ## Local private overrides
 
@@ -169,10 +169,6 @@ For my zsh to be as noninteractive to be set up as possible I made it to install
 ---
 
 - If `Go` is installed, set proper envs
-
----
-
-- If [c4p](https://github.com/TheArqsz/containers4pentesters) is installed, set proper envs
 
 ---
 
@@ -304,11 +300,10 @@ obsidian
 signal_desktop
 ```
 
-Additionally, three categories have been prepared:
+Additionally, two categories have been prepared:
 
 ```zsh
 all
-c4p
 gui
 ```
 
@@ -333,7 +328,6 @@ $ bootstrap --gui-tool copyq
 ### Categories
 
 - `all` - Installs all the CLI tools listed above
-- `c4p` - Installs the [c4p](https://github.com/TheArqsz/containers4pentesters) project
 - `gui` - Installs all the GUI tools listed above (`brave`, `chrome`, `copyq`, `flameshot`, `obsidian`, `signal_desktop`)
 
 ### Additional information on tools

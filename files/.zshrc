@@ -439,11 +439,6 @@ if [ -d "/usr/local/go/bin" ] && ! (( $+commands[go] )); then
 fi
 # --- END Golang
 
-# C4P
-# ---
-[ -d "$HOME/.c4p" ] && . $HOME/.c4p_config
-# --- END C4P
-
 # TLDR-c
 export TLDR_AUTO_UPDATE_DISABLED=1
 
