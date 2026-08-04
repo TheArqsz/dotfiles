@@ -706,7 +706,7 @@ security_bootstrap_gcheck() {
 		step "Installing gcheck dependencies"
 		sudo apt-get install --show-progress -yqq python3 python3-venv
 	fi
-	if ! _cmd_exists gcheck && _cmd_exists python3 && $(python3 -m venv -h 2>&1 1>/dev/null); then
+	if (! _cmd_exists gcheck || [[ "$force_reinstall" == "true" ]]) && _cmd_exists python3 && $(python3 -m venv -h 2>&1 1>/dev/null); then
 		step "Installing gcheck"
 		echo "You may need to type in your sudo password:"
 		sudo -v
@@ -714,6 +714,7 @@ security_bootstrap_gcheck() {
 		mkdir -p /opt/Tools
 		git clone https://github.com/TheArqsz/gcheck /opt/Tools/gcheck 2>/dev/null || {
 			echo "gcheck repository is already cloned"
+			git -C /opt/Tools/gcheck pull --ff-only
 		}
 		python3 -m venv /opt/Tools/gcheck/venv
 		/opt/Tools/gcheck/venv/bin/pip install /opt/Tools/gcheck
@@ -721,7 +722,7 @@ security_bootstrap_gcheck() {
 		echo '/opt/Tools/gcheck/venv/bin/gcheck "$@"' | sudo tee -a /usr/local/bin/gcheck 1>/dev/null
 		sudo chmod +x /usr/local/bin/gcheck
 		step "gcheck tool is installed"
-	elif _cmd_exists gcheck; then
+	elif _cmd_exists gcheck && [[ "$force_reinstall" != "true" ]]; then
 		step "gcheck is already installed"
 	else
 		step "Python or venv are not installed - skipping"
