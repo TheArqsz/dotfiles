@@ -10,6 +10,7 @@ This is a personal dotfiles repo for a security researcher/pentester.
 ### Shell scripts
 - Source `scripts/_bootstrap_lib.sh` first in every script
 - Guard every tool install with `_cmd_exists BIN` — all functions must be idempotent
+- Keep force flags consistent: `bootstrap.sh` and `bootstrap_security.sh` both support `-f/--force`
 - Use `_gh_latest_version owner/repo` for dynamic GitHub release version fetching
 - Use `_go_install_tool bin gomod` for Go tool installs
 - Use `step "MSG"` for section output headers

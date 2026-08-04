@@ -123,6 +123,7 @@ zsh scripts/bootstrap.sh --gui-tool brave  # Install GUI tool
 
 zsh scripts/bootstrap_security.sh -l  # List security tools
 zsh scripts/bootstrap_security.sh -t nuclei,subfinder
+zsh scripts/bootstrap_security.sh -f -t gobuster  # Force reinstall for a security tool
 
 update          # Shell alias: pull + install + zinit update + brew + apt
 reload          # Source ~/.zshrc

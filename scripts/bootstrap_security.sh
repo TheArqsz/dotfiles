@@ -24,6 +24,7 @@ Options:
                            gui: Install additional GUI-based tools (e.g. Signal, Brave, Burp Suite Pro)
                            tool1,tool2: Specify multiple tools separated by a comma
     --gui-tool             Install specific GUI tool
+    -f, --force            Force reinstall of tool(s) even if already installed
 
     -l, --list-tools       List tools to be bootstrapped
     -s, --system           Bootstrap system
@@ -765,6 +766,13 @@ security_gui_setup_burp_community() {
 
 # Main script handler and flags
 
+tool_to_bootstrap=
+list_tools=false
+additional_code_extensions=
+list_default_code_ext=false
+gui_tool_to_bootstrap=
+force_reinstall=false
+
 if [ $# -eq 0 ]; then
 	show_help
 	exit 0
@@ -806,6 +814,10 @@ while [ -n "$1" ]; do
 		fi
 		gui_tool_to_bootstrap="$2"
 		shift
+		;;
+	-f | --force)
+		force_reinstall=true
+		shift 0
 		;;
 	-v | --verbose)
 		set -x
