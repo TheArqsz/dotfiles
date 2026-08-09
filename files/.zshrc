@@ -400,8 +400,6 @@ setopt	appendhistory     	# Append history to the history file (no overwriting)
 setopt	sharehistory		# Share history across terminals
 setopt	incappendhistory	# Immediately append to the history file, not just when a term is killed
 setopt	hist_ignore_space	# Don't store commands prefixed with a space
-setopt	hist_ignore_dups	# Ignore duplicated commands history list
-setopt	hist_ignore_all_dups	# Do not enter command lines into the history list if they are duplicates of the previous event.
 setopt 	extended_history	# Record timestamp of command in HISTFILE
 # --- END History
 
