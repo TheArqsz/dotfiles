@@ -153,29 +153,6 @@ OMZP::command-not-found
 
 # zinit ice as"completion"; zinit snippet https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker
 
-# https://htr3n.github.io/2018/07/faster-zsh/
-# https://gist.github.com/ctechols/ca1035271ad134841284
-# autoload -Uz compinit
-# if [[ -f "$HOME/.zcompdump" ]]; then
-#   # Check if the cached .zcompdump file must be regenerated once a day
-#   # (today as a day in the year vs the time of .zcompdump creation in a day of a year)
-#   if [ $(date +%j) != $(date -r "$HOME/.zcompdump" +%j) ]; then
-#     compinit
-#   else
-#     # Use cached
-#     # compinit -C - not working? gonna fix it in the future
-#     # Some completions are not loading poperly after the first session is loaded
-#     # As an example - ufw is not completing properly
-#     # compinit -w says that:
-#     # regenerating because: number of files in dump 993 differ from files found in $fpath 1303
-#     # This takes almost half the time of prompt to initialize
-#     compinit
-#   fi
-# else
-#   # File doesn't exist - we have to regenerate it anyway
-#   compinit
-# fi
-
 zinit cdreplay -q
 
 ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets root line)
