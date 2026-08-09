@@ -107,6 +107,7 @@ I am using some Zinit's native plugins but also some from OhMyZSH (with prefix `
 ###  Prompt
 
 As for the prompt, I am using the highly customizable [Spaceship](https://spaceship-prompt.sh/) with following sections:
+- time            - Time section
 - user            - Username section
 - host            - Hostname section
 - ip              - [Custom IP section](TheArqsz/spaceship-ip)
@@ -125,6 +126,7 @@ As for the prompt, I am using the highly customizable [Spaceship](https://spaces
 I've also written a few shell functions that allow me to modify the prompt on the fly:
 - [switch_prompt_ip](./files/.functions#switch_prompt_ip)
 - [switch_prompt_hostname](./files/.functions#switch_prompt_hostname)
+- [switch_prompt_time](./files/.functions#switch_prompt_time)
 
 ###  Automatic installation of additional software
 
@@ -230,6 +232,8 @@ This repository includes several useful functions to enhance the workflow. Below
 - **switch_prompt_ip**: Toggle the display of the IP address in the Spaceship prompt.
 
 - **switch_prompt_hostname**: Toggle the display of the hostname in the Spaceship prompt.
+
+- **switch_prompt_time**: Toggle the display of the time in the Spaceship prompt.
 
 - **generate_password**: Generate a random password with customizable length and character options.
 

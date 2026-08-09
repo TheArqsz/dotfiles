@@ -113,6 +113,25 @@ function switch_prompt_hostname {
 	[[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
 }
 
+# Hide or show time from Spaceship prompt
+function switch_prompt_time {
+	local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"
+	[[ -f "$spaceship_custom_config" ]] || (mkdir -p "$(dirname $spaceship_custom_config)" && touch "$spaceship_custom_config")
+
+	if grep -q "SPACESHIP_TIME_SHOW=true" "$spaceship_custom_config" >/dev/null; then
+		# Hide time
+		sed 's/^SPACESHIP_TIME_SHOW=true/SPACESHIP_TIME_SHOW=false/' "$spaceship_custom_config" >"$spaceship_custom_config.tmp" && mv "$spaceship_custom_config.tmp" "$spaceship_custom_config"
+	elif grep -q "SPACESHIP_TIME_SHOW=false" "$spaceship_custom_config" >/dev/null; then
+		# Show time
+		sed 's/^SPACESHIP_TIME_SHOW=false/SPACESHIP_TIME_SHOW=true/' "$spaceship_custom_config" >"$spaceship_custom_config.tmp" && mv "$spaceship_custom_config.tmp" "$spaceship_custom_config"
+	else
+		echo "# Edited by switch_prompt_time function" >>"$spaceship_custom_config"
+		echo "SPACESHIP_TIME_SHOW=false" >>"$spaceship_custom_config"
+	fi
+	# Reload zsh
+	[[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
+}
+
 function generate_password {
 	local length=${1:-8} # Default length is 8 if not provided
 	local use_uppercase=false
