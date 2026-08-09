@@ -88,7 +88,7 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
 if [[ ! -d "${ZINIT_HOME}" ]]; then
   mkdir -p "$(dirname "$ZINIT_HOME")" &&  chmod g-rwX "${ZINIT_HOME}"
-  git clone https://github.com/zdharma-continuum/zinit "${ZINIT_HOME}" || \
+  git clone --depth 1 https://github.com/zdharma-continuum/zinit "${ZINIT_HOME}" || \
   print -P "The zinit installation has failed."
 fi
 if [[ -f "${ZINIT_HOME}/zinit.zsh" ]]; then
