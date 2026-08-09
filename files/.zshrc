@@ -203,6 +203,8 @@ SPACESHIP_EXIT_CODE_SYMBOL=''
 
 # User section
 SPACESHIP_USER_SHOW='always'
+# Section's prefix
+SPACESHIP_USER_PREFIX=''
 # Section's suffix
 SPACESHIP_USER_SUFFIX=''
 
@@ -246,6 +248,13 @@ SPACESHIP_PACKAGE_PREFIX="pkg("
 SPACESHIP_PACKAGE_SUFFIX=") "
 SPACESHIP_PACKAGE_SYMBOL=""
 
+# Time section
+SPACESHIP_TIME_SHOW=true
+SPACESHIP_TIME_COLOR="244"
+SPACESHIP_TIME_FORMAT="[%D{%H:%M:%S %Z}]"
+SPACESHIP_TIME_PREFIX=""
+SPACESHIP_TIME_SUFFIX=" "
+
 
 # Initialize prompt
 zinit light spaceship-prompt/spaceship-prompt
@@ -262,6 +271,7 @@ spaceship add ip
 SPACESHIP_PROMPT_ASYNC=true
 # https://github.com/spaceship-prompt/spaceship-prompt/issues/1193#issuecomment-1954674054
 SPACESHIP_PROMPT_ORDER=(
+  time            # Time section
   user            # Username section
   host            # Hostname section
   ip              # IP section
