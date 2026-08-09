@@ -77,9 +77,9 @@ fi
 
 # Tmux on ssh
 if [[ -n "$PS1" ]] && [[ -z "$TMUX" ]] && [[ -n "$SSH_CONNECTION" ]]; then
-	if command -v tmux >/dev/null 2>&1; then
-  		tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
-	fi
+  if command -v tmux >/dev/null 2>&1; then
+    tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
+  fi
 fi
 
 # Zinit's installer
