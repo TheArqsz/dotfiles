@@ -375,15 +375,15 @@ function convert_jwt {
 	local payload=$(echo "$jwt" | cut -d '.' -f 2)
 	local signature=$(echo "$jwt" | cut -d '.' -f 3)
 
-	# Decode the header and payload
-	local decoded_header=$(echo "$header" | base64 --decode 2>/dev/null)
-	local decoded_payload=$(echo "$payload" | base64 --decode 2>/dev/null)
+	# JWT segments are base64url, unpadded; translate to standard base64 before decoding.
+	local h64="${header//-/+}" p64="${payload//-/+}"
+	h64="${h64//_//}"; p64="${p64//_//}"
+	while (( ${#h64} % 4 )); do h64+="="; done
+	while (( ${#p64} % 4 )); do p64+="="; done
 
-	# Check if decoding was successful
-	if [[ $? -ne 0 ]]; then
-		echo "Error: Invalid JWT format."
-		return 1
-	fi
+	local decoded_header decoded_payload
+	decoded_header=$(echo "$h64" | base64 --decode 2>/dev/null) || { echo "Error: Invalid JWT format."; return 1; }
+	decoded_payload=$(echo "$p64" | base64 --decode 2>/dev/null) || { echo "Error: Invalid JWT format."; return 1; }
 
 	# Print the decoded header and payload
 	echo "Decoded Header:"
