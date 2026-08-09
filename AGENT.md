@@ -36,6 +36,13 @@ install.conf.yaml   # Dotbot config: symlinks · dirs · shell bootstrap
 
 ## Patterns & Conventions
 
+### Code comments
+
+- Default to no comments — well-named functions/vars should carry the meaning
+- Only comment a non-obvious WHY (a workaround, a platform quirk, a hidden constraint) — never restate WHAT the code does
+- Keep any comment to one line; no comment blocks or docstrings
+- Don't reference the current task/fix/PR in a comment — it rots as the code evolves
+
 ### Bootstrap scripts
 
 ```bash
