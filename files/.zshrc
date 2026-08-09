@@ -491,7 +491,3 @@ unset _nvm_wrapped_cmd
 # --- END NVM
 [ -f "$HOME/.safe-chain/scripts/init-posix.sh" ] && source "$HOME/.safe-chain/scripts/init-posix.sh" # Safe-chain Zsh initialization script
 
-
-# Generated for pdtm. Do not edit.
-export PATH=$PATH:/home/arek/.pdtm/go/bin
-
