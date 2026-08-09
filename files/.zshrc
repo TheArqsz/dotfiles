@@ -136,7 +136,11 @@ zsh-users/zsh-autosuggestions \
 zsh-users/zsh-completions
 
 zinit light zsh-users/zsh-history-substring-search
-[[ "$(uname)" != "Darwin" ]] && zinit light zdharma-continuum/fast-syntax-highlighting # this really slows down prompt typing on MacOS
+# Deferred so it loads after zsh-autosuggestions (must come first, per docs)
+if [[ "$(uname)" != "Darwin" ]]; then
+  zinit ice wait lucid
+  zinit light zdharma-continuum/fast-syntax-highlighting # this really slows down prompt typing on MacOS
+fi
 
 zinit lucid for \
 OMZP::copyfile \
