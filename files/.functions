@@ -91,7 +91,7 @@ function switch_prompt_ip {
 		echo "SPACESHIP_IP_SHOW=false" >>"$spaceship_custom_config"
 	fi
 	# Reload zsh
-	[[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
+	[[ -f "$HOME/.zshrc" ]] && exec zsh
 }
 
 # Hide or show hostname from Spaceship prompt
@@ -110,7 +110,7 @@ function switch_prompt_hostname {
 		echo "SPACESHIP_HOST_SHOW=false" >>"$spaceship_custom_config"
 	fi
 	# Reload zsh
-	[[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
+	[[ -f "$HOME/.zshrc" ]] && exec zsh
 }
 
 # Hide or show time from Spaceship prompt
@@ -129,7 +129,7 @@ function switch_prompt_time {
 		echo "SPACESHIP_TIME_SHOW=false" >>"$spaceship_custom_config"
 	fi
 	# Reload zsh
-	[[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
+	[[ -f "$HOME/.zshrc" ]] && exec zsh
 }
 
 function generate_password {
