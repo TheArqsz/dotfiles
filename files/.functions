@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 # Enter a running Docker container.
 function dockenter {
@@ -7,7 +7,7 @@ function dockenter {
 		return 0
 	fi
 
-	docker exec -it $1 bash
+	docker exec -it "$1" bash
 	return 0
 }
 
