@@ -22,7 +22,8 @@ export CLICOLOR=1
 export CLICOLOR_FORCE=1
 
 # Custom PATH
-export PATH="$PATH:$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/sbin:$HOME/go/bin"
+typeset -U path
+path+=("$HOME/.local/bin" /opt/homebrew/bin /usr/local/bin /usr/local/sbin "$HOME/go/bin")
 
 # Include alias file (if present) containing aliases for ssh, etc.
 if [ -f ~/.aliases ]
