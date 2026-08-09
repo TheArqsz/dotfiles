@@ -144,6 +144,8 @@ security_bootstrap_masscan() {
 security_bootstrap_projectdiscovery() {
 	echo
 	if _cmd_exists go && [[ -f "/etc/debian_version" ]]; then
+		# Prevents pdtm from re-appending its PATH export to .zshrc on every run
+		export PATH="$PATH:$HOME/.pdtm/go/bin"
 		step "Installing ProjectDiscovery tools with pdtm"
 		if ! _cmd_exists pdtm; then
 			step "Installing pdtm"
