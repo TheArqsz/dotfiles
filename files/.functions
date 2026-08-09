@@ -80,15 +80,12 @@ function switch_prompt_ip {
 	local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"
 	[[ -f "$spaceship_custom_config" ]] || (mkdir -p "$(dirname $spaceship_custom_config)" && touch "$spaceship_custom_config")
 
-	local sed_backup=""
-	[[ "$(uname)" == "Darwin" ]] && sed_backup="''"
-
 	if grep -q "SPACESHIP_IP_SHOW=true" "$spaceship_custom_config" >/dev/null; then
 		# Hide IP
-		sed -i$sed_backup 's/^SPACESHIP_IP_SHOW=true/SPACESHIP_IP_SHOW=false/' "$spaceship_custom_config"
+		sed 's/^SPACESHIP_IP_SHOW=true/SPACESHIP_IP_SHOW=false/' "$spaceship_custom_config" >"$spaceship_custom_config.tmp" && mv "$spaceship_custom_config.tmp" "$spaceship_custom_config"
 	elif grep -q "SPACESHIP_IP_SHOW=false" "$spaceship_custom_config" >/dev/null; then
 		# Show IP
-		sed -i$sed_backup 's/^SPACESHIP_IP_SHOW=false/SPACESHIP_IP_SHOW=true/' "$spaceship_custom_config"
+		sed 's/^SPACESHIP_IP_SHOW=false/SPACESHIP_IP_SHOW=true/' "$spaceship_custom_config" >"$spaceship_custom_config.tmp" && mv "$spaceship_custom_config.tmp" "$spaceship_custom_config"
 	else
 		echo "# Edited by switch_prompt_ip function" >>"$spaceship_custom_config"
 		echo "SPACESHIP_IP_SHOW=false" >>"$spaceship_custom_config"
@@ -102,15 +99,12 @@ function switch_prompt_hostname {
 	local spaceship_custom_config="$HOME/.config/custom.spaceship.zsh"
 	[[ -f "$spaceship_custom_config" ]] || (mkdir -p "$(dirname $spaceship_custom_config)" && touch "$spaceship_custom_config")
 
-	local sed_backup=""
-	[[ "$(uname)" == "Darwin" ]] && sed_backup="''"
-
 	if grep -q 'SPACESHIP_HOST_SHOW="always"' "$spaceship_custom_config" >/dev/null; then
 		# Hide hostname
-		sed -i$sed_backup 's/^SPACESHIP_HOST_SHOW="always"/SPACESHIP_HOST_SHOW=false/' "$spaceship_custom_config"
+		sed 's/^SPACESHIP_HOST_SHOW="always"/SPACESHIP_HOST_SHOW=false/' "$spaceship_custom_config" >"$spaceship_custom_config.tmp" && mv "$spaceship_custom_config.tmp" "$spaceship_custom_config"
 	elif grep -q "SPACESHIP_HOST_SHOW=false" "$spaceship_custom_config" >/dev/null; then
 		# Show IP
-		sed -i$sed_backup 's/^SPACESHIP_HOST_SHOW=false/SPACESHIP_HOST_SHOW="always"/' "$spaceship_custom_config"
+		sed 's/^SPACESHIP_HOST_SHOW=false/SPACESHIP_HOST_SHOW="always"/' "$spaceship_custom_config" >"$spaceship_custom_config.tmp" && mv "$spaceship_custom_config.tmp" "$spaceship_custom_config"
 	else
 		echo "# Edited by switch_prompt_hostname function" >>"$spaceship_custom_config"
 		echo "SPACESHIP_HOST_SHOW=false" >>"$spaceship_custom_config"
@@ -224,7 +218,7 @@ function mount_cryptomator {
 	while [[ $# -gt 2 ]]; do
 		case "$3" in
 		*)
-			echo "Unknown option: $2"
+			echo "Unknown option: $3"
 			return 1
 			;;
 		esac
