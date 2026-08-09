@@ -22,7 +22,9 @@ export CLICOLOR=1
 export CLICOLOR_FORCE=1
 
 # Custom PATH
-typeset -U path
+# -g: this file is sourced from inside functions too (e.g. switch_prompt_*);
+# without -g, typeset here would shadow global PATH with an empty local one.
+typeset -gU path
 path+=("$HOME/.local/bin" /opt/homebrew/bin /usr/local/bin /usr/local/sbin "$HOME/go/bin")
 
 # Include alias file (if present) containing aliases for ssh, etc.
