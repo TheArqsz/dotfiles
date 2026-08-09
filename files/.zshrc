@@ -138,8 +138,12 @@ zsh-users/zsh-autosuggestions \
 zsh-users/zsh-completions
 
 zinit light zsh-users/zsh-history-substring-search
-# Deferred so it loads after zsh-autosuggestions (must come first, per docs)
-if [[ "$(uname)" != "Darwin" ]]; then
+# Deferred so it loads after zsh-autosuggestions (must come first, per docs).
+# Guarded to run once per session: re-queuing this ice'd task on every
+# .zshrc re-source (e.g. via switch_prompt_*) re-wraps self-insert each
+# time and eventually hits FUNCNEST.
+if [[ -z "$_FSH_LOADED" ]] && [[ "$(uname)" != "Darwin" ]]; then
+  typeset -g _FSH_LOADED=1
   zinit ice wait lucid
   zinit light zdharma-continuum/fast-syntax-highlighting # this really slows down prompt typing on MacOS
 fi
