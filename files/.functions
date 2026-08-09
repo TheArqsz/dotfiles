@@ -175,11 +175,14 @@ function generate_password {
 		char_space="${char_space}!@#\$%^&*()_-+=<>?"
 	fi
 
-	# Generate the random password
-	local password=""
-	for ((i = 0; i < length; i++)); do
-		local rand_char="${char_space[$((RANDOM % ${#char_space} + 1))]}"
-		password+="$rand_char"
+	# $RANDOM is predictable; draw from /dev/urandom instead, rejection-sampled to avoid modulo bias.
+	local password="" charspace_len=${#char_space}
+	local max_valid=$(( 256 - 256 % charspace_len ))
+	local byte
+	while (( ${#password} < length )); do
+		byte=$(( 16#$(od -An -tx1 -N1 /dev/urandom | tr -d ' ') ))
+		(( byte >= max_valid )) && continue
+		password+="${char_space[$((byte % charspace_len + 1))]}"
 	done
 
 	echo "$password"
