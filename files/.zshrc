@@ -345,13 +345,13 @@ backward-kill-dir () {
 zle -N backward-kill-dir
 # Alt+Left
 backward-word-dir () {
-  local WORDCHARS=${WORDCHARS/\/}
+  local WORDCHARS=${WORDCHARS//[\/=?\&]}
   zle backward-word
 }
 zle -N backward-word-dir
 # Alt+Right
 forward-word-dir () {
-  local WORDCHARS=${WORDCHARS/\/}
+  local WORDCHARS=${WORDCHARS//[\/=?\&]}
   zle forward-word
 }
 zle -N forward-word-dir
