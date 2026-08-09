@@ -236,6 +236,8 @@ SPACESHIP_TIME_FORMAT="[%D{%H:%M:%S %Z}]"
 SPACESHIP_TIME_PREFIX=""
 SPACESHIP_TIME_SUFFIX=" "
 
+# https://github.com/spaceship-prompt/spaceship-prompt/issues/1356
+SPACESHIP_PROMPT_ASYNC=true
 
 # Initialize prompt
 zinit light spaceship-prompt/spaceship-prompt
@@ -247,9 +249,7 @@ zinit light spaceship-prompt/spaceship-prompt
 zinit light TheArqsz/spaceship-ip
 spaceship add ip
 
-# https://github.com/spaceship-prompt/spaceship-prompt/issues/1356
-# Enable async on all platforms for responsive prompts
-SPACESHIP_PROMPT_ASYNC=true
+# Must come after `spaceship add ip` above since it references the ip section
 # https://github.com/spaceship-prompt/spaceship-prompt/issues/1193#issuecomment-1954674054
 SPACESHIP_PROMPT_ORDER=(
   time            # Time section
