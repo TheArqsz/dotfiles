@@ -22,6 +22,7 @@ This is a personal dotfiles repo for a security researcher/pentester.
 - New `$HOME` dirs go in `create:` section of `install.conf.yaml`
 - Do not edit `dotbot/` subdirectory — it is a git submodule
 - Keep personal untracked overrides in `~/.config/zsh/local-overrides.zsh` (for local envs/aliases/functions)
+- Gate dynamic tab titles and `title lock [NAME]` / `title unlock` to interactive Windows Terminal sessions via `WT_SESSION`; prefix automatic and locked titles with `[WSL_DISTRO_NAME] ` when available; keep title locks shell-local, unexported, and persistent across `reload`
 
 ### Aliases / Functions
 - Wrap tool-specific aliases in `_cmd_exists` guards

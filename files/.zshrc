@@ -277,6 +277,50 @@ SPACESHIP_PROMPT_ORDER=(
 
 # --- END Theme
 
+if [[ -o interactive && -n "${WT_SESSION:-}" ]]; then
+  _windows_terminal_title() {
+    [[ -n "${WT_SESSION:-}" ]] || return 0
+    local folder_name="${PWD:t}"
+    [[ "$PWD" == "$HOME" ]] && folder_name='~'
+    folder_name="${_WINDOWS_TERMINAL_TITLE_LOCK:-$folder_name}"
+    folder_name="${folder_name//[[:cntrl:]]/}"
+    local distro_name="${WSL_DISTRO_NAME:-}"
+    distro_name="${distro_name//[[:cntrl:]]/}"
+    local tab_title="${folder_name:-/}"
+    [[ -n "$distro_name" ]] && tab_title="[$distro_name] $tab_title"
+    printf '\033]0;%s\007' "$tab_title"
+  }
+  title() {
+    if [[ -z "${WT_SESSION:-}" ]]; then
+      print -u2 -r -- 'Title control is only available in Windows Terminal.'
+      return 1
+    fi
+    case "${1:-}:$#" in
+      lock:1|lock:2)
+        local title_name="${PWD:t}"
+        [[ "$PWD" == "$HOME" ]] && title_name='~'
+        title_name="${2-${_WINDOWS_TERMINAL_TITLE_LOCK:-${title_name:-/}}}"
+        title_name="${title_name//[[:cntrl:]]/}"
+        if [[ -z "$title_name" ]]; then
+          print -u2 -r -- 'Title must not be empty.'
+          return 2
+        fi
+        typeset -g _WINDOWS_TERMINAL_TITLE_LOCK="$title_name"
+        ;;
+      unlock:1)
+        unset _WINDOWS_TERMINAL_TITLE_LOCK
+        ;;
+      *)
+        print -u2 -r -- 'Usage: title lock [NAME] | title unlock'
+        return 2
+        ;;
+    esac
+    _windows_terminal_title
+  }
+  autoload -Uz add-zsh-hook
+  add-zsh-hook precmd _windows_terminal_title
+fi
+
 # Case insensitive.
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 

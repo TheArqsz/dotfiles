@@ -128,6 +128,27 @@ I've also written a few shell functions that allow me to modify the prompt on th
 - [switch_prompt_hostname](./files/.functions#switch_prompt_hostname)
 - [switch_prompt_time](./files/.functions#switch_prompt_time)
 
+In Windows Terminal only (`WT_SESSION` is set), the tab title follows the current
+folder name at each prompt, with `~` for home and `/` for root. Other terminals
+are unchanged. Reload Zsh with `reload` to activate this behavior.
+
+On WSL, `WSL_DISTRO_NAME` prefixes both automatic and locked titles, for example
+`[Ubuntu] project` or `[Ubuntu] Investigation`. Without a distro name, the title
+has no prefix.
+
+```zsh
+title lock                 # Freeze the current shell title
+title lock "Investigation" # Set and lock a custom title
+title unlock               # Resume current-folder titles immediately
+```
+
+The lock belongs to the current shell, survives `reload`, and is not exported to
+child shells or other tabs. Programs may temporarily change the title while
+running; the shell restores it at the next prompt. For a hard override even
+while programs run, use Windows Terminal's **Rename Tab** action. Ensure the
+profile's `suppressApplicationTitle` setting is `false` for shell-driven titles;
+a manually renamed tab must be reset before automatic titles can display.
+
 ###  Automatic installation of additional software
 
 For my zsh to be as noninteractive to be set up as possible I made it to install a few tools automatically at the first shell boot. It sets up:

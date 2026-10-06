@@ -104,6 +104,7 @@ fi
 - fzf backend: `fd`/`fdfind` preferred over `find`
 - Custom spaceship sections go in `~/.config/custom.spaceship.zsh`
 - Personal, untracked overrides go in `~/.config/zsh/local-overrides.zsh` (envs, aliases, local-only functions)
+- Windows Terminal titles are gated by `WT_SESSION` in interactive shells: folder basename (`~` for home, `/` for root) at each prompt, prefixed with `[WSL_DISTRO_NAME] ` on WSL when available. `title lock [NAME]` / `title unlock` manage an unexported, reload-persistent shell-local override; the WSL prefix also applies to locked titles, and other terminals are unchanged.
 
 ---
 
